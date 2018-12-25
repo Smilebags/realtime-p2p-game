@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,8 +6,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { GameServer } from "./gameServer.js";
+import { Player } from "./player.js";
 document.addEventListener("DOMContentLoaded", () => {
-    let role = "unset";
     let connectEl = document.querySelector(".connect");
     let serverEl = document.querySelector(".server");
     let playerEl = document.querySelector(".player");
@@ -49,7 +49,7 @@ function joinGame(id) {
         });
         conn.on("open", () => {
             conn.on("data", (data) => {
-                playerDataHandler(data);
+                player.handleMessage(data);
             });
             conn.send({
                 type: "registerPlayer",
@@ -61,32 +61,10 @@ function joinGame(id) {
             let leftEl = document.querySelector(".left");
             let downEl = document.querySelector(".down");
             let rightEl = document.querySelector(".right");
-            if (upEl) {
-                upEl.addEventListener("click", () => {
-                    player.move("up");
-                });
-            }
-            if (leftEl) {
-                leftEl.addEventListener("click", () => {
-                    player.move("left");
-                });
-            }
-            if (downEl) {
-                downEl.addEventListener("click", () => {
-                    player.move("down");
-                });
-            }
-            if (rightEl) {
-                rightEl.addEventListener("click", () => {
-                    player.move("right");
-                });
-            }
+            addInteractionEvents([upEl, leftEl, downEl, rightEl], player);
             resolve();
         });
     });
-}
-function playerDataHandler(data) {
-    console.log(data);
 }
 function makeServer() {
     return new Promise((resolve, reject) => {
@@ -122,112 +100,16 @@ function makeServer() {
         });
     });
 }
-class Player {
-    constructor(options = {
-            name: "",
-            location: "unset",
-        }) {
-        const defaults = {
-            name: "",
-            location: "unset"
-        };
-        options = Object.assign({}, defaults, options);
-        this.x = 100;
-        this.y = 100;
-        this.name = options.name;
-        this.location = options.location;
-        this.connection = options.connection;
-        this.ctx = options.canvasContext;
-    }
-    render() {
-        if (this.ctx) {
-            this.ctx.beginPath();
-            this.ctx.fillStyle = "#000000";
-            this.ctx.rect(this.x, this.y, 10, 10);
-            this.ctx.fill();
-            this.ctx.closePath();
-        }
-    }
-    update() {
-        if (this.location === "client") {
-            this.connection.send({
-                type: "playerData",
-                data: {
-                    x: this.x,
-                    y: this.y,
-                    name: this.name
-                }
+function addInteractionEvents(elements, player) {
+    let dirArr = ["up", "left", "down", "right"];
+    elements.forEach((element, index) => {
+        if (element) {
+            element.addEventListener("touchstart", (e) => {
+                console.log(`Touchstart: ${dirArr[index]}`);
+                e.preventDefault();
+                e.stopPropagation();
+                player.move(dirArr[index]);
             });
         }
-    }
-    move(direction) {
-        switch (direction) {
-            case "up":
-                this.y -= 10;
-                break;
-            case "down":
-                this.y += 10;
-                break;
-            case "left":
-                this.x -= 10;
-                break;
-            case "right":
-                this.x += 10;
-                break;
-            default:
-                break;
-        }
-        this.update();
-    }
-    setPos(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
-class GameServer {
-    constructor(canvas) {
-        this.playerList = [];
-        this.canvas = canvas;
-        this.canvas.width = 1000;
-        this.canvas.height = 1000;
-        this.context = canvas.getContext("2d");
-        this.render();
-    }
-    addPlayer(name) {
-        this.playerList.push(new Player({
-            name,
-            location: "host",
-            canvasContext: this.context
-        }));
-    }
-    findPlayerByName(name) {
-        return this.playerList.find((player) => {
-            return player.name === name;
-        }) || null;
-    }
-    render() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.playerList.forEach((player) => {
-            player.render();
-        });
-        requestAnimationFrame(() => {
-            this.render();
-        });
-    }
-    handleMessage(message) {
-        switch (message.type) {
-            case "registerPlayer":
-                this.addPlayer(message.data.name);
-                break;
-            case "playerData":
-                let player = this.findPlayerByName(message.data.name);
-                if (player) {
-                    player.setPos(message.data.x, message.data.y);
-                }
-                break;
-            default:
-                break;
-        }
-        console.log(message);
-    }
+    });
 }
