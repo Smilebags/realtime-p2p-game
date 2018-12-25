@@ -6,7 +6,7 @@ let app: express.Express = express();
 
 
 app.get("/", (req, res) => {
-    res.send("Hello world!");
+    res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
 });
 
 app.use(express.static(path.join(__dirname, "../../frontend/dist")));

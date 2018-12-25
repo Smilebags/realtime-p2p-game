@@ -5,7 +5,7 @@ const path = require("path");
 const peer_1 = require("./peer");
 let app = express();
 app.get("/", (req, res) => {
-    res.send("Hello world!");
+    res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
 });
 app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 exports.server = app.listen(9000);
