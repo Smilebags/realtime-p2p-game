@@ -10,8 +10,28 @@
     <script src="index.js"></script>
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <input type="text" class="id">
-    <button class="connect">Connect</button>
+    <div class="role-select">
+        <button class="player">Join Game</button>
+        <button class="server">Host Game</button>
+    </div>
+    <div class="player-config">
+        <label for="serverId">Server ID:</label>
+        <input type="text" id="serverId" name="serverId" class="id">
+        <label for="playerName">Your name:</label>
+        <input type="text" id="playerName" name="playerName" class="player-name">
+        <button class="connect">Connect</button>
+    </div>
+    <div class="player-controls">
+        <div class="directions">
+            <div class="up">⮝</div>
+            <div class="left">⮜</div>
+            <div class="down">⮟</div>
+            <div class="right">⮞</div>
+        </div>
+    </div>
+    <div class="server-screen">
+        <span class="serverId">Loading</span>
+        <canvas></canvas>
+    </div>
 </body>
 </html>

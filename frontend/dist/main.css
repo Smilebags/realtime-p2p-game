@@ -1,0 +1,118 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+*  {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.role-select {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    transform: translateX(0);
+    transition: 0.2s;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.role-select > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.role-select button {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0;
+    margin: 0;
+    display: block;
+    border: none;
+}
+
+
+.player-controls .directions {
+    display: grid;
+    grid-template-columns: 100px 100px 100px;
+    grid-template-rows: 100px 100px;
+    grid-template-areas: ". up ." " left down right";
+    grid-gap: 16px;
+}
+
+.player-controls .up,
+.player-controls .left,
+.player-controls .down,
+.player-controls .right {
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-controls .up {
+    grid-area: up;
+}
+.player-controls .left {
+    grid-area: left;
+}
+.player-controls .down {
+    grid-area: down;
+}
+.player-controls .right {
+    grid-area: right;
+}
+
+.player-config, .player-controls, .server-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    transform: translateX(100%);
+    transition: 0.2s;
+}
+
+.role-server .server-screen {
+    transform: translateX(0);
+}
+
+.role-server .role-select, .role-player .role-select {
+    transform: translateX(-100%);
+}
+
+
+.role-player .player-config {
+    transform: translateX(0);
+}
+
+.game-connected .player-config {
+    transform: translateX(-100%);
+}
+
+.game-connected .player-controls {
+    transform: translateX(0);
+}
+
+
+.server-screen {
+    position: relative;
+}
+
+canvas {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
+}
