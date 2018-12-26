@@ -10,3 +10,5 @@ The primary device (whatever acts as the shared game screen) hosts a game, and u
 This obviously works best (low latency and reliable connection) if all the devices are on the same local network, but will also work with most router configurations over the internet as well.
 
 Excuse my game-design skills (or lack thereof), as the focus of this experiment was on the technology stack rather than the enjoyability of the game. For those who are interested, it is a multiplayer 'Snake' like game where you collect food and can eat each-other to get the longest tail. Each controller (mobile phone or other computer) will display their score, name and snake colour, as well as some directional buttons for touch screens. For keyboard users, WASD works too.
+
+[See live example](https://smilebags.github.io/realtime-p2p-game/frontend/dist/index.html)
