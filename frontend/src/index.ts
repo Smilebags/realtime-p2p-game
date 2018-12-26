@@ -38,8 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if(connectEl) {
         connectEl.addEventListener("click", async () => {
             let id: string = (<HTMLInputElement>(document.querySelector(".id"))).value;
-            await joinGame(id);
-            document.documentElement.classList.add("game-connected");
+            let name: string = (<HTMLInputElement>(document.querySelector(".player-name"))).value;
+            if(id.length && name.length) {
+                await joinGame(id);
+                document.documentElement.classList.add("game-connected");
+            } else {
+                // tell the user they need to enter both name and game ID
+            }
         });
     }
 });
@@ -108,7 +113,7 @@ function makeServer(): Promise<string> {
 
         peer.on("connection", (conn: any) => {
             conn.on("data", (data: IPeerMessage) => {
-                server.handleMessage(data);
+                server.handleMessage(data, conn);
             });
             peer.on("disconnected", () => {
                 alert("Connection has been lost.");

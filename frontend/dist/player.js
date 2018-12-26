@@ -2,12 +2,12 @@ export class Player {
     constructor(options = {
             name: "",
             location: "unset",
-            worldSize: 30
+            worldSize: 30,
         }) {
         const defaults = {
             name: "",
             location: "unset",
-            worldSize: 30
+            worldSize: 30,
         };
         options = Object.assign({}, defaults, options);
         this.x = 0;
@@ -21,6 +21,7 @@ export class Player {
         this.tail = [];
         this.facing = "down";
         this.tailLength = 0;
+        this.colour = options.colour || "#000000";
     }
     render() {
         if (this.ctx) {
@@ -38,7 +39,7 @@ export class Player {
             }
             // draw the head
             this.ctx.beginPath();
-            this.ctx.fillStyle = "#000000";
+            this.ctx.fillStyle = this.colour;
             this.ctx.rect(this.x, this.y, this.size, this.size);
             this.ctx.fill();
             this.ctx.closePath();
@@ -112,14 +113,18 @@ export class Player {
         }
     }
     handleMessage(message) {
+        if (message.type === "playerInfo") {
+            // set the controller screen's info
+        }
         console.log(message);
     }
+}
+export class ClientPlayer {
 }
 function clamp(val, min, max) {
     return Math.min(max, Math.max(val, min));
 }
 function boundedBy(val, min, max) {
     // include lower bound exclude upper bound
-    console.log(`val ${val} is between ${min} and ${max}`);
     return val >= min && val < max;
 }

@@ -17,15 +17,16 @@ export class Player {
     tail: {x: number, y: number}[];
     tailLength: number;
     facing: Direction;
+    colour: string;
     constructor(options: IPlayerConstructorOptions = {
         name: "",
         location: "unset",
-        worldSize: 30
+        worldSize: 30,
     }) {
         const defaults: IPlayerConstructorOptions = {
             name: "",
             location: "unset",
-            worldSize: 30
+            worldSize: 30,
         };
         options = {
             ...defaults,
@@ -42,6 +43,7 @@ export class Player {
         this.tail = [];
         this.facing = "down";
         this.tailLength = 0;
+        this.colour = options.colour || "#000000";
     }
     render(): void {
         if(this.ctx) {
@@ -59,7 +61,7 @@ export class Player {
             }
             // draw the head
             this.ctx.beginPath();
-            this.ctx.fillStyle = "#000000";
+            this.ctx.fillStyle = this.colour;
             this.ctx.rect(this.x, this.y, this.size, this.size);
             this.ctx.fill();
             this.ctx.closePath();
@@ -97,7 +99,7 @@ export class Player {
             default:
                 break;
         }
-        
+
         let successful: boolean = boundedBy(this.x, 0, this.worldSize) && boundedBy(this.y, 0, this.worldSize);
         this.x = clamp(this.x, 0, this.worldSize - this.size);
         this.y = clamp(this.y, 0, this.worldSize - this.size);
@@ -141,8 +143,15 @@ export class Player {
     }
 
     handleMessage(message: IPeerMessage): void {
+        if(message.type === "playerInfo") {
+            // set the controller screen's info
+        }
         console.log(message);
     }
+}
+
+export class ClientPlayer {
+    
 }
 
 

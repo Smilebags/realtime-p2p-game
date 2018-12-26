@@ -1,3 +1,6 @@
+// todo: Add player colours and scoreboard
+// todo: Add colour and score to controller screen
+// todo: Add easier way to join game (create join link on game host)
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -34,8 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (connectEl) {
         connectEl.addEventListener("click", () => __awaiter(this, void 0, void 0, function* () {
             let id = (document.querySelector(".id")).value;
-            yield joinGame(id);
-            document.documentElement.classList.add("game-connected");
+            let name = (document.querySelector(".player-name")).value;
+            if (id.length && name.length) {
+                yield joinGame(id);
+                document.documentElement.classList.add("game-connected");
+            }
+            else {
+                // tell the user they need to enter both name and game ID
+            }
         }));
     }
 });
@@ -92,7 +101,7 @@ function makeServer() {
         });
         peer.on("connection", (conn) => {
             conn.on("data", (data) => {
-                server.handleMessage(data);
+                server.handleMessage(data, conn);
             });
             peer.on("disconnected", () => {
                 alert("Connection has been lost.");
