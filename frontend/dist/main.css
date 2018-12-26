@@ -111,13 +111,23 @@ html, body {
 
 .server-screen {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+.server-screen .serverId {
+    position: absolute;
+    z-index: 1;
+    top: 16px;
+    left: 16px;
 }
 
 canvas {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
+    width: calc(100vmin - 2px);
+    height: calc(100vmin - 2px);
     z-index: -1;
+    border: 1px solid black;
 }

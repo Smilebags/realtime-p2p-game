@@ -8,6 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { GameServer } from "./gameServer.js";
 import { Player } from "./player.js";
+import addShortcut from "./shortcut.js";
+const worldSize = 30;
 document.addEventListener("DOMContentLoaded", () => {
     let connectEl = document.querySelector(".connect");
     let serverEl = document.querySelector(".server");
@@ -19,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.documentElement.classList.add("role-server");
             let serverId = yield makeServer();
             if (serverIdEl) {
-                serverIdEl.innerHTML = `Server ID: ${serverId}`;
+                serverIdEl.innerHTML = `Game ID: ${serverId}`;
             }
         }));
     }
@@ -42,14 +44,15 @@ function joinGame(id) {
         // @ts-ignore
         let peer = new Peer();
         let conn = peer.connect(id);
-        let player = new Player({
-            name: document.querySelector(".player-name").value,
-            location: "client",
-            connection: conn
-        });
-        conn.on("open", () => {
+        conn.on("open", () => __awaiter(this, void 0, void 0, function* () {
             conn.on("data", (data) => {
                 player.handleMessage(data);
+            });
+            let player = new Player({
+                name: document.querySelector(".player-name").value,
+                location: "client",
+                connection: conn,
+                worldSize: worldSize
             });
             conn.send({
                 type: "registerPlayer",
@@ -63,7 +66,7 @@ function joinGame(id) {
             let rightEl = document.querySelector(".right");
             addInteractionEvents([upEl, leftEl, downEl, rightEl], player);
             resolve();
-        });
+        }));
     });
 }
 function makeServer() {
@@ -71,7 +74,9 @@ function makeServer() {
         // @ts-ignore
         let peer = new Peer();
         let canvas = document.querySelector("canvas");
-        let server = new GameServer(canvas);
+        // canvas.width = 1000;
+        // canvas.height = 1000;
+        let server = new GameServer(canvas, worldSize, 1000);
         peer.on("open", function (id) {
             resolve(id);
             console.log("ID: " + id);
@@ -102,14 +107,22 @@ function makeServer() {
 }
 function addInteractionEvents(elements, player) {
     let dirArr = ["up", "left", "down", "right"];
+    let hotkeyArr = ["w", "a", "s", "d"];
     elements.forEach((element, index) => {
         if (element) {
             element.addEventListener("touchstart", (e) => {
                 console.log(`Touchstart: ${dirArr[index]}`);
                 e.preventDefault();
                 e.stopPropagation();
-                player.move(dirArr[index]);
+                player.makeFacing(dirArr[index]);
             });
         }
+        addShortcut({
+            hotkey: hotkeyArr[index],
+            callback: () => {
+                console.log(`Making facing ${dirArr[index]}`);
+                player.makeFacing(dirArr[index]);
+            }
+        });
     });
 }

@@ -5,7 +5,7 @@ export interface IPlayerConstructorOptions {
     location: DeviceLocation;
     connection?: any;
     canvasContext?: CanvasRenderingContext2D;
-
+    worldSize: number;
 }
 
 export interface IPeerMessage {

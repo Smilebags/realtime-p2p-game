@@ -12,32 +12,58 @@ export class Player {
     location: DeviceLocation;
     connection?: any;
     ctx?: CanvasRenderingContext2D;
+    worldSize: number;
+    size: number;
+    tail: {x: number, y: number}[];
+    tailLength: number;
+    facing: Direction;
     constructor(options: IPlayerConstructorOptions = {
         name: "",
         location: "unset",
+        worldSize: 30
     }) {
         const defaults: IPlayerConstructorOptions = {
             name: "",
-            location: "unset"
+            location: "unset",
+            worldSize: 30
         };
         options = {
             ...defaults,
             ...options
         };
-        this.x = 100;
-        this.y = 100;
+        this.x = 0;
+        this.y = 0;
         this.name = options.name;
         this.location = options.location;
         this.connection = options.connection;
         this.ctx = options.canvasContext;
+        this.worldSize = options.worldSize;
+        this.size = 1;
+        this.tail = [];
+        this.facing = "down";
+        this.tailLength = 0;
     }
     render(): void {
         if(this.ctx) {
+            // draw the tail
+            if(this.tailLength > 0) {
+                this.ctx.beginPath();
+                this.ctx.fillStyle = "#333333";
+                this.tail.forEach((tailItem) => {
+                        if(this.ctx) {
+                            this.ctx.rect(tailItem.x, tailItem.y, this.size, this.size);
+                        }
+                    });
+                this.ctx.fill();
+                this.ctx.closePath();
+            }
+            // draw the head
             this.ctx.beginPath();
             this.ctx.fillStyle = "#000000";
-            this.ctx.rect(this.x, this.y, 10, 10);
+            this.ctx.rect(this.x, this.y, this.size, this.size);
             this.ctx.fill();
             this.ctx.closePath();
+
         }
     }
     private update(): void {
@@ -45,31 +71,42 @@ export class Player {
             this.connection.send({
                 type: "playerData",
                 data: {
-                    x: this.x,
-                    y: this.y,
-                    name: this.name
+                    // x: this.x,
+                    // y: this.y,
+                    name: this.name,
+                    facing: this.facing
                 }
             });
         }
     }
 
-    move(direction: Direction): void {
-        switch (direction) {
+    walk(): boolean {
+        switch (this.facing) {
             case "up":
-                this.y -= 10;
+                this.y -= this.size;
                 break;
             case "down":
-                this.y += 10;
+                this.y += this.size;
                 break;
             case "left":
-                this.x -= 10;
+                this.x -= this.size;
                 break;
             case "right":
-                this.x += 10;
+                this.x += this.size;
                 break;
             default:
                 break;
         }
+        
+        let successful: boolean = boundedBy(this.x, 0, this.worldSize) && boundedBy(this.y, 0, this.worldSize);
+        this.x = clamp(this.x, 0, this.worldSize - this.size);
+        this.y = clamp(this.y, 0, this.worldSize - this.size);
+        this.update();
+        return successful;
+    }
+
+    makeFacing(direction: Direction): void {
+        this.facing = direction;
         this.update();
     }
 
@@ -78,7 +115,42 @@ export class Player {
         this.y = y;
     }
 
+    addPoint(points:number = 1): void {
+        this.tailLength += points;
+        // potentially use this to track the points of each player
+    }
+
+    gametick():void {
+        let oldX: number = this.x;
+        let oldY: number = this.y;
+        // move the head forward if possible
+        let walked: boolean = this.walk();
+        if(walked) {
+            // add a new tail at the old head location
+            this.tail.push({x: oldX, y: oldY});
+        }
+        // clip the tail (from 0) if it is longer than it should be
+        while(this.tail.length > this.tailLength && this.tail.length !== 0) {
+            this.tail.shift();
+        }
+        // remove the last tail position if the walk was unsuccessful
+        if(!walked) {
+            this.tail.shift();
+            this.addPoint(-1);
+        }
+    }
+
     handleMessage(message: IPeerMessage): void {
         console.log(message);
     }
+}
+
+
+function clamp(val: number, min: number, max: number): number {
+    return Math.min(max, Math.max(val, min));
+}
+
+function boundedBy(val: number, min: number, max: number): boolean {
+    // include lower bound exclude upper bound
+    return val >= min && val < max;
 }
