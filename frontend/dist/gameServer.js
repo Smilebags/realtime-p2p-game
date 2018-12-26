@@ -18,13 +18,14 @@ export class GameServer {
         }, this.gametickSpeed);
         this.render();
     }
-    addPlayer(name) {
+    addPlayer(name, connection) {
         let newPlayer = new Player({
             name,
             location: "host",
             canvasContext: this.context,
             worldSize: this.worldSize,
-            colour: makePlayerColour(name)
+            colour: makePlayerColour(name),
+            connection
         });
         this.playerList.push(newPlayer);
         return newPlayer;
@@ -49,15 +50,7 @@ export class GameServer {
     handleMessage(message, connection) {
         switch (message.type) {
             case "registerPlayer":
-                let newPlayer = this.addPlayer(message.data.name);
-                connection.send({
-                    type: "playerInfo",
-                    data: {
-                        colour: newPlayer.colour,
-                        name: newPlayer.name,
-                        score: 0,
-                    }
-                });
+                let newPlayer = this.addPlayer(message.data.name, connection);
                 break;
             case "playerData":
                 let player = this.findPlayerByName(message.data.name);
@@ -137,7 +130,8 @@ function makePlayerColour(str) {
         strSum *= letter.charCodeAt(0);
         strSum = strSum % 10000;
     });
-    return hslToHex(strSum % 360, 50, 50);
+    let brightness = (Math.random() * 50) + 25;
+    return hslToHex(strSum % 360, 50, brightness);
 }
 /**
  * Returns a hex string based on an HSL colour

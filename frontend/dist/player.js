@@ -1,19 +1,9 @@
+import addShortcut from "./shortcut.js";
 export class Player {
-    constructor(options = {
-            name: "",
-            location: "unset",
-            worldSize: 30,
-        }) {
-        const defaults = {
-            name: "",
-            location: "unset",
-            worldSize: 30,
-        };
-        options = Object.assign({}, defaults, options);
+    constructor(options = {}) {
         this.x = 0;
         this.y = 0;
         this.name = options.name;
-        this.location = options.location;
         this.connection = options.connection;
         this.ctx = options.canvasContext;
         this.worldSize = options.worldSize;
@@ -22,6 +12,14 @@ export class Player {
         this.facing = "down";
         this.tailLength = 0;
         this.colour = options.colour || "#000000";
+        this.connection.send({
+            type: "playerInfo",
+            data: {
+                score: this.tailLength,
+                name: this.name,
+                colour: this.colour,
+            }
+        });
     }
     render() {
         if (this.ctx) {
@@ -46,17 +44,12 @@ export class Player {
         }
     }
     update() {
-        if (this.location === "client") {
-            this.connection.send({
-                type: "playerData",
-                data: {
-                    // x: this.x,
-                    // y: this.y,
-                    name: this.name,
-                    facing: this.facing
-                }
-            });
-        }
+        this.connection.send({
+            type: "playerInfo",
+            data: {
+                score: this.tailLength
+            }
+        });
     }
     walk() {
         switch (this.facing) {
@@ -78,20 +71,17 @@ export class Player {
         let successful = boundedBy(this.x, 0, this.worldSize) && boundedBy(this.y, 0, this.worldSize);
         this.x = clamp(this.x, 0, this.worldSize - this.size);
         this.y = clamp(this.y, 0, this.worldSize - this.size);
-        this.update();
         return successful;
     }
     makeFacing(direction) {
         this.facing = direction;
-        this.update();
     }
     setPos(x, y) {
         this.x = x;
         this.y = y;
     }
     addPoint(points = 1) {
-        this.tailLength += points;
-        // potentially use this to track the points of each player
+        this.tailLength = Math.max(this.tailLength + points, 0);
     }
     gametick() {
         let oldX = this.x;
@@ -111,15 +101,92 @@ export class Player {
             this.tail.shift();
             this.addPoint(-1);
         }
+        this.update();
     }
     handleMessage(message) {
-        if (message.type === "playerInfo") {
-            // set the controller screen's info
-        }
         console.log(message);
     }
 }
 export class ClientPlayer {
+    constructor(options = {}) {
+        let { name, connection, buttonElements, nameEl, scoreEl, colourEl, } = options;
+        this.name = name;
+        this.connection = connection;
+        this.buttonElements = buttonElements;
+        this.addInteractionEvents(buttonElements);
+        this.nameEl = nameEl;
+        this.scoreEl = scoreEl;
+        this.colourEl = colourEl;
+        this.score = 0;
+        this.colour = "#000000";
+        this.nameEl.innerText = name;
+        this.colourEl.style.backgroundColor = this.colour;
+        this.setScore(0);
+        connection.on("data", (data) => {
+            this.handleMessage(data);
+        });
+        connection.send({
+            type: "registerPlayer",
+            data: {
+                name: this.name
+            }
+        });
+    }
+    handleMessage(message) {
+        switch (message.type) {
+            case "playerInfo":
+                // set score, name and colour
+                if (message.data.score) {
+                    this.setScore(message.data.score);
+                }
+                if (message.data.colour) {
+                    this.colour = message.data.colour;
+                    this.colourEl.style.backgroundColor = this.colour;
+                }
+                if (message.data.name) {
+                    this.name = message.data.name;
+                    this.nameEl.innerText = this.name;
+                }
+                break;
+            default:
+                console.log(message);
+                break;
+        }
+    }
+    makeFacing(dir) {
+        this.connection.send({
+            type: "playerData",
+            data: {
+                name: this.name,
+                facing: dir
+            }
+        });
+    }
+    setScore(score) {
+        this.score = score;
+        this.scoreEl.innerText = String(this.score);
+    }
+    addInteractionEvents(elements) {
+        let dirArr = ["up", "left", "down", "right"];
+        let hotkeyArr = ["w", "a", "s", "d"];
+        elements.forEach((element, index) => {
+            if (element) {
+                element.addEventListener("touchstart", (e) => {
+                    console.log(`Touchstart: ${dirArr[index]}`);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.makeFacing(dirArr[index]);
+                });
+            }
+            addShortcut({
+                hotkey: hotkeyArr[index],
+                callback: () => {
+                    console.log(`Making facing ${dirArr[index]}`);
+                    this.makeFacing(dirArr[index]);
+                }
+            });
+        });
+    }
 }
 function clamp(val, min, max) {
     return Math.min(max, Math.max(val, min));

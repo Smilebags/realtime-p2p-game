@@ -4,6 +4,7 @@ html, body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 *  {
@@ -40,14 +41,27 @@ html, body {
 }
 
 
-.player-controls .directions {
+.player-controls {
     display: grid;
     width: 100vw;
     height: 100vh;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    grid-template-areas: ". up ." " left down right";
+    grid-template-areas: "info up ." " left down right";
     grid-gap: 16px;
+    padding: 16px;
+}
+
+@media (orientation: portrait) {
+    .player-controls {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: 2fr 1fr 1fr;
+        grid-template-areas: "info info info" ". up ." "left down right";
+    }
+}
+
+.player-controls .directions {
+    display: contents;
 }
 
 .player-controls .up,
@@ -75,6 +89,15 @@ html, body {
 }
 .player-controls .right {
     grid-area: right;
+}
+
+.player-controls .colour {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12vmin
 }
 
 .player-config, .player-controls, .server-screen {

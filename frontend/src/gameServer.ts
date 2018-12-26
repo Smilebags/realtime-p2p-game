@@ -1,5 +1,5 @@
 import {
-    IPeerMessage
+    IPeerMessage, IConnection
 } from "./types";
 import { Player } from "./player.js";
 import { Entity } from "./entities.js";
@@ -31,13 +31,14 @@ export class GameServer {
         this.render();
     }
 
-    addPlayer(name: string): Player {
+    addPlayer(name: string, connection: IConnection): Player {
         let newPlayer: Player = new Player({
             name,
             location: "host",
             canvasContext: this.context,
             worldSize: this.worldSize,
-            colour: makePlayerColour(name)
+            colour: makePlayerColour(name),
+            connection
         });
         this.playerList.push(newPlayer);
         return newPlayer;
@@ -63,18 +64,10 @@ export class GameServer {
         });
     }
 
-    handleMessage(message: IPeerMessage, connection: any): void {
+    handleMessage(message: IPeerMessage, connection: IConnection): void {
         switch (message.type) {
             case "registerPlayer":
-                let newPlayer: Player = this.addPlayer(message.data.name);
-                connection.send(<IPeerMessage>{
-                    type: "playerInfo",
-                    data: {
-                        colour: newPlayer.colour,
-                        name: newPlayer.name,
-                        score: 0,
-                    }
-                });
+                let newPlayer: Player = this.addPlayer(message.data.name, connection);
                 break;
             case "playerData":
                 let player: Player | null = this.findPlayerByName(message.data.name);
@@ -162,9 +155,8 @@ function makePlayerColour(str: string): string {
         strSum *= letter.charCodeAt(0);
         strSum = strSum % 10000;
     });
-    return hslToHex(strSum % 360, 50, 50);
-
-
+    let brightness: number = (Math.random() * 50) + 25;
+    return hslToHex(strSum % 360, 50, brightness);
 }
 
 /**

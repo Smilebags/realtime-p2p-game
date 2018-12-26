@@ -1,5 +1,4 @@
 // todo: Add player colours and scoreboard
-// todo: Add colour and score to controller screen
 // todo: Add easier way to join game (create join link on game host)
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -10,8 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { GameServer } from "./gameServer.js";
-import { Player } from "./player.js";
-import addShortcut from "./shortcut.js";
+import { ClientPlayer } from "./player.js";
 const worldSize = 30;
 document.addEventListener("DOMContentLoaded", () => {
     let connectEl = document.querySelector(".connect");
@@ -54,27 +52,28 @@ function joinGame(id) {
         let peer = new Peer();
         let conn = peer.connect(id);
         conn.on("open", () => __awaiter(this, void 0, void 0, function* () {
-            conn.on("data", (data) => {
-                player.handleMessage(data);
-            });
-            let player = new Player({
-                name: document.querySelector(".player-name").value,
-                location: "client",
-                connection: conn,
-                worldSize: worldSize
-            });
-            conn.send({
-                type: "registerPlayer",
-                data: {
-                    name: player.name
-                }
-            });
             let upEl = document.querySelector(".up");
             let leftEl = document.querySelector(".left");
             let downEl = document.querySelector(".down");
             let rightEl = document.querySelector(".right");
-            addInteractionEvents([upEl, leftEl, downEl, rightEl], player);
-            resolve();
+            let nameEl = document.querySelector(".name");
+            let scoreEl = document.querySelector(".score");
+            let colourEl = document.querySelector(".colour");
+            if (upEl && leftEl && downEl && rightEl && nameEl && scoreEl && colourEl) {
+                let player = new ClientPlayer({
+                    name: document.querySelector(".player-name").value,
+                    connection: conn,
+                    buttonElements: [upEl, leftEl, downEl, rightEl],
+                    nameEl,
+                    scoreEl,
+                    colourEl,
+                });
+                resolve();
+            }
+            else {
+                // couldn't find button elements
+                reject();
+            }
         }));
     });
 }
@@ -111,27 +110,6 @@ function makeServer() {
             setInterval(() => {
                 conn.send({ type: "ping", data: i++ });
             }, 1000);
-        });
-    });
-}
-function addInteractionEvents(elements, player) {
-    let dirArr = ["up", "left", "down", "right"];
-    let hotkeyArr = ["w", "a", "s", "d"];
-    elements.forEach((element, index) => {
-        if (element) {
-            element.addEventListener("touchstart", (e) => {
-                console.log(`Touchstart: ${dirArr[index]}`);
-                e.preventDefault();
-                e.stopPropagation();
-                player.makeFacing(dirArr[index]);
-            });
-        }
-        addShortcut({
-            hotkey: hotkeyArr[index],
-            callback: () => {
-                console.log(`Making facing ${dirArr[index]}`);
-                player.makeFacing(dirArr[index]);
-            }
         });
     });
 }

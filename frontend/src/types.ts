@@ -1,14 +1,5 @@
 import { Player } from "./player.js";
 
-export interface IPlayerConstructorOptions {
-    name: string;
-    location: DeviceLocation;
-    connection?: any;
-    canvasContext?: CanvasRenderingContext2D;
-    worldSize: number;
-    colour?: string;
-}
-
 export type IPeerMessage =  {type: "ping", data: Ping} |
                             {type: "playerData", data: IPlayerData} |
                             {type: "registerPlayer", data: IRegisterPlayer} |
@@ -19,9 +10,9 @@ interface IPlayerData {
     facing: Direction;
 }
 interface IPlayerInfo {
-    name: string;
-    colour: string;
-    score: number;
+    name?: string;
+    colour?: string;
+    score?: number;
 }
 interface IRegisterPlayer {
     name: string;
@@ -33,6 +24,17 @@ export interface IServerData {
     context: CanvasRenderingContext2D;
     canvas: HTMLCanvasElement;
 }
+
+
+export interface IConnection {
+    send: (message: IPeerMessage) => void;
+    on: ConnectionDataEvent;
+}
+
+type ConnectionDataEvent = (eventName: "data", callback: (data: IPeerMessage) => any) => void;
+
+type ConnectionEventNames = "data";
+
 
 export type ErrorWithType = Error & {type: string};
 
