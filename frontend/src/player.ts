@@ -2,31 +2,49 @@ import {
     DeviceLocation,
     Direction,
     IPeerMessage,
-    IConnection
+    IPlayerInfo
 } from "./types";
 
 import addShortcut from "./shortcut.js";
+import { boundedBy, clamp } from "./util.js";
+
+interface IClientPlayerConstructorOptions {
+    name: string;
+    connection: PeerJs.DataConnection;
+    buttonElements: HTMLElement[];
+    nameEl: HTMLElement;
+    scoreEl: HTMLElement;
+    colourEl: HTMLElement;
+}
+
+
+interface IHostPlayerConstructorOptions {
+    name: string;
+    location: DeviceLocation;
+    connection: PeerJs.DataConnection;
+    canvasContext: CanvasRenderingContext2D;
+    worldSize: number;
+    colour: string;
+}
 
 export class HostPlayer {
     x: number;
     y: number;
     name: string;
-    connection: IConnection;
+    connection: PeerJs.DataConnection;
     ctx?: CanvasRenderingContext2D;
     worldSize: number;
-    size: number;
     tail: {x: number, y: number}[];
     tailLength: number;
     facing: Direction;
     colour: string;
-    constructor(options: IPlayerConstructorOptions = <IPlayerConstructorOptions>{}) {
+    constructor(options: IHostPlayerConstructorOptions = <IHostPlayerConstructorOptions>{}) {
         this.x = 0;
         this.y = 0;
         this.name = options.name;
         this.connection = options.connection;
         this.ctx = options.canvasContext;
         this.worldSize = options.worldSize;
-        this.size = 1;
         this.tail = [];
         this.facing = "down";
         this.tailLength = 0;
@@ -48,7 +66,7 @@ export class HostPlayer {
                 this.ctx.fillStyle = "#333333";
                 this.tail.forEach((tailItem) => {
                         if(this.ctx) {
-                            this.ctx.rect(tailItem.x, tailItem.y, this.size, this.size);
+                            this.ctx.rect(tailItem.x, tailItem.y, 1, 1);
                         }
                     });
                 this.ctx.fill();
@@ -57,7 +75,7 @@ export class HostPlayer {
             // draw the head
             this.ctx.beginPath();
             this.ctx.fillStyle = this.colour;
-            this.ctx.rect(this.x, this.y, this.size, this.size);
+            this.ctx.rect(this.x, this.y, 1, 1);
             this.ctx.fill();
             this.ctx.closePath();
 
@@ -75,24 +93,24 @@ export class HostPlayer {
     walk(): boolean {
         switch (this.facing) {
             case "up":
-                this.y -= this.size;
+                this.y -= 1;
                 break;
             case "down":
-                this.y += this.size;
+                this.y += 1;
                 break;
             case "left":
-                this.x -= this.size;
+                this.x -= 1;
                 break;
             case "right":
-                this.x += this.size;
+                this.x += 1;
                 break;
             default:
                 break;
         }
 
         let successful: boolean = boundedBy(this.x, 0, this.worldSize) && boundedBy(this.y, 0, this.worldSize);
-        this.x = clamp(this.x, 0, this.worldSize - this.size);
-        this.y = clamp(this.y, 0, this.worldSize - this.size);
+        this.x = clamp(this.x, 0, this.worldSize - 1);
+        this.y = clamp(this.y, 0, this.worldSize - 1);
         return successful;
     }
 
@@ -137,7 +155,7 @@ export class HostPlayer {
 
 export class ClientPlayer {
     name: string;
-    connection: IConnection;
+    connection: PeerJs.DataConnection;
     buttonElements: HTMLElement[];
     nameEl: HTMLElement;
     scoreEl: HTMLElement;
@@ -183,21 +201,25 @@ export class ClientPlayer {
         switch (message.type) {
             case "playerInfo":
                 // set score, name and colour
-                if(message.data.score) {
-                    this.setScore(message.data.score);
-                }
-                if(message.data.colour) {
-                    this.colour = message.data.colour;
-                    this.colourEl.style.backgroundColor = this.colour;
-                }
-                if(message.data.name) {
-                    this.name = message.data.name;
-                    this.nameEl.innerText = this.name;
-                }
+                this.handlePlayerInfoMessage(message.data);
                 break;
             default:
                 console.log(message);
                 break;
+        }
+    }
+
+    handlePlayerInfoMessage(data: IPlayerInfo): void {
+        if(data.score) {
+            this.setScore(data.score);
+        }
+        if(data.colour) {
+            this.colour = data.colour;
+            this.colourEl.style.backgroundColor = this.colour;
+        }
+        if(data.name) {
+            this.name = data.name;
+            this.nameEl.innerText = this.name;
         }
     }
 
@@ -217,53 +239,22 @@ export class ClientPlayer {
     }
 
     addInteractionEvents(elements: HTMLElement[]): void {
-        let dirArr: string[] = ["up", "left", "down", "right"];
+        let dirArr: Direction[] = ["up", "left", "down", "right"];
         let hotkeyArr: string[] = ["w", "a", "s", "d"];
         elements.forEach((element, index) => {
             if(element) {
                 element.addEventListener("touchstart", (e) => {
-                    console.log(`Touchstart: ${dirArr[index]}`);
                     e.preventDefault();
                     e.stopPropagation();
-                    this.makeFacing(<Direction>dirArr[index]);
+                    this.makeFacing(dirArr[index]);
                 });
             }
             addShortcut({
                 hotkey: hotkeyArr[index],
                 callback: () => {
-                    console.log(`Making facing ${dirArr[index]}`);
-                    this.makeFacing(<Direction>dirArr[index]);
+                    this.makeFacing(dirArr[index]);
                 }
             });
         });
     }
-}
-
-interface IClientPlayerConstructorOptions {
-    name: string;
-    connection: IConnection;
-    buttonElements: HTMLElement[];
-    nameEl: HTMLElement;
-    scoreEl: HTMLElement;
-    colourEl: HTMLElement;
-}
-
-
-interface IPlayerConstructorOptions {
-    name: string;
-    location: DeviceLocation;
-    connection: any;
-    canvasContext: CanvasRenderingContext2D;
-    worldSize: number;
-    colour: string;
-}
-
-
-function clamp(val: number, min: number, max: number): number {
-    return Math.min(max, Math.max(val, min));
-}
-
-function boundedBy(val: number, min: number, max: number): boolean {
-    // include lower bound exclude upper bound
-    return val >= min && val < max;
 }

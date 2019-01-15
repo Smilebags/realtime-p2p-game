@@ -1,18 +1,19 @@
-import {
-    IPeerMessage, IConnection
-} from "./types";
+import { IPeerMessage } from "./types";
 import { HostPlayer } from "./player.js";
-import { Entity } from "./entities.js";
+import { Food } from "./entities.js";
+import { hslToHex } from "./util.js";
 
 export class GameServer {
+    id: string;
     playerList: HostPlayer[];
-    entityList: Entity[];
+    entityList: Food[];
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
     worldSize: number;
     gametickSpeed: number;
     tickCount: number;
-    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number) {
+    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, id: string) {
+        this.id = id;
         this.playerList = [];
         this.entityList = [];
         this.canvas = canvas;
@@ -31,7 +32,7 @@ export class GameServer {
         this.render();
     }
 
-    addPlayer(name: string, connection: IConnection): HostPlayer {
+    addPlayer(name: string, connection: PeerJs.DataConnection): HostPlayer {
         let newPlayer: HostPlayer = new HostPlayer({
             name,
             location: "host",
@@ -64,22 +65,20 @@ export class GameServer {
         });
     }
 
-    handleMessage(message: IPeerMessage, connection: IConnection): void {
+    handleMessage(message: IPeerMessage, connection: PeerJs.DataConnection): void {
         switch (message.type) {
             case "registerPlayer":
-                let newPlayer: HostPlayer = this.addPlayer(message.data.name, connection);
+                this.addPlayer(message.data.name, connection);
                 break;
             case "playerData":
                 let player: HostPlayer | null = this.findPlayerByName(message.data.name);
                 if (player) {
-                    // player.setPos(message.data.x, message.data.y);
                     player.facing = message.data.facing;
                 }
                 break;
             default:
                 break;
         }
-        console.log(message);
     }
 
     gametick(): void {
@@ -137,7 +136,7 @@ export class GameServer {
 
         // add more food
         if(this.tickCount % 10 === 0) {
-            this.entityList.push(new Entity({
+            this.entityList.push(new Food({
                 x: Math.floor(Math.random() * (this.worldSize + 1)),
                 y: Math.floor(Math.random() * (this.worldSize + 1)),
                 ctx: this.context
@@ -158,48 +157,3 @@ function makePlayerColour(str: string): string {
     let brightness: number = (Math.random() * 50) + 25;
     return hslToHex(strSum % 360, 50, brightness);
 }
-
-/**
- * Returns a hex string based on an HSL colour
- * @param h Hue in degrees
- * @param s Saturation percent
- * @param l Luminance percent
- */
-function hslToHex(h: number, s: number, l: number): string {
-    h /= 360;
-    s /= 100;
-    l /= 100;
-    let r: number, g: number, b: number;
-    if (s === 0) {
-      r = g = b = l; // achromatic
-    } else {
-      const hue2rgb:((p: number, q: number, t: number) => number) = (p: number, q: number, t: number) => {
-        if(t < 0) {
-            t += 1;
-        }
-        if(t > 1) {
-            t -= 1;
-        }
-        if(t < 1 / 6) {
-            return p + (q - p) * 6 * t;
-        }
-        if(t < 1 / 2) {
-            return q;
-        }
-        if(t < 2 / 3) {
-            return p + (q - p) * (2 / 3 - t) * 6;
-        }
-        return p;
-      };
-      const q: number = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p: number = 2 * l - q;
-      r = hue2rgb(p, q, h + 1 / 3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1 / 3);
-    }
-    const toHex: (x: number) => string = (x: number) => {
-      const hex: string = Math.round(x * 255).toString(16);
-      return hex.length === 1 ? "0" + hex : hex;
-    };
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  }

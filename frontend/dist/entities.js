@@ -1,4 +1,4 @@
-export class Entity {
+export class Food {
     constructor(options = {}) {
         let defaults = {
             x: 0,

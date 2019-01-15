@@ -1,7 +1,9 @@
-import { Player } from "./player.js";
-import { Entity } from "./entities.js";
+import { HostPlayer } from "./player.js";
+import { Food } from "./entities.js";
+import { hslToHex } from "./util.js";
 export class GameServer {
-    constructor(canvas, worldSize, canvasSize) {
+    constructor(canvas, worldSize, canvasSize, id) {
+        this.id = id;
         this.playerList = [];
         this.entityList = [];
         this.canvas = canvas;
@@ -19,7 +21,7 @@ export class GameServer {
         this.render();
     }
     addPlayer(name, connection) {
-        let newPlayer = new Player({
+        let newPlayer = new HostPlayer({
             name,
             location: "host",
             canvasContext: this.context,
@@ -50,19 +52,17 @@ export class GameServer {
     handleMessage(message, connection) {
         switch (message.type) {
             case "registerPlayer":
-                let newPlayer = this.addPlayer(message.data.name, connection);
+                this.addPlayer(message.data.name, connection);
                 break;
             case "playerData":
                 let player = this.findPlayerByName(message.data.name);
                 if (player) {
-                    // player.setPos(message.data.x, message.data.y);
                     player.facing = message.data.facing;
                 }
                 break;
             default:
                 break;
         }
-        console.log(message);
     }
     gametick() {
         // gametick all players
@@ -114,7 +114,7 @@ export class GameServer {
         });
         // add more food
         if (this.tickCount % 10 === 0) {
-            this.entityList.push(new Entity({
+            this.entityList.push(new Food({
                 x: Math.floor(Math.random() * (this.worldSize + 1)),
                 y: Math.floor(Math.random() * (this.worldSize + 1)),
                 ctx: this.context
@@ -132,49 +132,4 @@ function makePlayerColour(str) {
     });
     let brightness = (Math.random() * 50) + 25;
     return hslToHex(strSum % 360, 50, brightness);
-}
-/**
- * Returns a hex string based on an HSL colour
- * @param h Hue in degrees
- * @param s Saturation percent
- * @param l Luminance percent
- */
-function hslToHex(h, s, l) {
-    h /= 360;
-    s /= 100;
-    l /= 100;
-    let r, g, b;
-    if (s === 0) {
-        r = g = b = l; // achromatic
-    }
-    else {
-        const hue2rgb = (p, q, t) => {
-            if (t < 0) {
-                t += 1;
-            }
-            if (t > 1) {
-                t -= 1;
-            }
-            if (t < 1 / 6) {
-                return p + (q - p) * 6 * t;
-            }
-            if (t < 1 / 2) {
-                return q;
-            }
-            if (t < 2 / 3) {
-                return p + (q - p) * (2 / 3 - t) * 6;
-            }
-            return p;
-        };
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-    }
-    const toHex = (x) => {
-        const hex = Math.round(x * 255).toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
-    };
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }

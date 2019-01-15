@@ -1,6 +1,3 @@
-// todo: Add scoreboard to main screen
-// todo: Add easier way to join game (create join link on game host)
-
 import {
     ErrorWithType,
     IPeerMessage,
@@ -8,6 +5,7 @@ import {
 
 import { GameServer } from "./gameServer.js";
 import { ClientPlayer } from "./player.js";
+import { generateID } from "./util.js";
 
 const worldSize: number = 30;
 
@@ -20,9 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
         serverEl.addEventListener("click", async () => {
             // set up server Peer and display ID
             document.documentElement.classList.add("role-server");
-            let serverId: string = await makeServer();
+
+            const peer: PeerJs.Peer = new Peer(generateID());
+            const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
+
+            const server: GameServer = await makeGameServer(canvas, peer);
             if(serverIdEl) {
-                serverIdEl.innerHTML = `Game ID: ${serverId}`;
+                serverIdEl.innerHTML = `Game ID: ${server.id}`;
             }
         });
     }
@@ -48,10 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function joinGame(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
-        // @ts-ignore
-        let peer: any = new Peer();
+        let peer: PeerJs.Peer = new Peer(generateID(16));
 
-        let conn: any = peer.connect(id);
+        let conn: PeerJs.DataConnection = peer.connect(id);
 
 
         conn.on("open", async () => {
@@ -83,36 +84,32 @@ function joinGame(id: string): Promise<void> {
 }
 
 
-function makeServer(): Promise<string> {
+function makeGameServer(canvas: HTMLCanvasElement, peer: PeerJs.Peer): Promise<GameServer> {
     return new Promise((resolve, reject) => {
-        // @ts-ignore
-        let peer: any = new Peer();
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-        // canvas.width = 1000;
-        // canvas.height = 1000;
-        let server: GameServer = new GameServer(canvas, worldSize, 1000);
+        const server: GameServer = new GameServer(canvas, worldSize, 1000, peer.id);
 
         peer.on("open", function (id: string): void {
-            resolve(id);
+            resolve(server);
             console.log("ID: " + id);
         });
 
         peer.on("error", function (err:ErrorWithType): void {
             if (err.type === "unavailable-id") {
-                alert("" + err);
-                peer.reconnect();
+                reject(err);
             } else {
                 alert(err);
+                reject(err);
             }
         });
 
-        peer.on("connection", (conn: any) => {
+        peer.on("disconnected", () => {
+            alert("Connection has been lost.");
+            peer.reconnect();
+        });
+
+        peer.on("connection", (conn: PeerJs.DataConnection) => {
             conn.on("data", (data: IPeerMessage) => {
                 server.handleMessage(data, conn);
-            });
-            peer.on("disconnected", () => {
-                alert("Connection has been lost.");
-                peer.reconnect();
             });
             let i: number = 0;
             setInterval(() => {

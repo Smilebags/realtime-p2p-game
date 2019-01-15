@@ -10,7 +10,10 @@ export default function addShortcut(options: IaddShortcutOptions = {}): void {
         callback: undefined,
         scope: document.body
     };
-    let {hotkey, callback, scope} = {
+    let {hotkey, callback, scope} = <{
+        hotkey: string | undefined,
+        callback: (keyDownEvent: KeyboardEvent) => any | undefined,
+        scope: HTMLElement }>{
         ...defaults,
         ...options
     };

@@ -1,5 +1,6 @@
 import addShortcut from "./shortcut.js";
-export class Player {
+import { boundedBy, clamp } from "./util.js";
+export class HostPlayer {
     constructor(options = {}) {
         this.x = 0;
         this.y = 0;
@@ -7,7 +8,6 @@ export class Player {
         this.connection = options.connection;
         this.ctx = options.canvasContext;
         this.worldSize = options.worldSize;
-        this.size = 1;
         this.tail = [];
         this.facing = "down";
         this.tailLength = 0;
@@ -29,7 +29,7 @@ export class Player {
                 this.ctx.fillStyle = "#333333";
                 this.tail.forEach((tailItem) => {
                     if (this.ctx) {
-                        this.ctx.rect(tailItem.x, tailItem.y, this.size, this.size);
+                        this.ctx.rect(tailItem.x, tailItem.y, 1, 1);
                     }
                 });
                 this.ctx.fill();
@@ -38,7 +38,7 @@ export class Player {
             // draw the head
             this.ctx.beginPath();
             this.ctx.fillStyle = this.colour;
-            this.ctx.rect(this.x, this.y, this.size, this.size);
+            this.ctx.rect(this.x, this.y, 1, 1);
             this.ctx.fill();
             this.ctx.closePath();
         }
@@ -54,23 +54,23 @@ export class Player {
     walk() {
         switch (this.facing) {
             case "up":
-                this.y -= this.size;
+                this.y -= 1;
                 break;
             case "down":
-                this.y += this.size;
+                this.y += 1;
                 break;
             case "left":
-                this.x -= this.size;
+                this.x -= 1;
                 break;
             case "right":
-                this.x += this.size;
+                this.x += 1;
                 break;
             default:
                 break;
         }
         let successful = boundedBy(this.x, 0, this.worldSize) && boundedBy(this.y, 0, this.worldSize);
-        this.x = clamp(this.x, 0, this.worldSize - this.size);
-        this.y = clamp(this.y, 0, this.worldSize - this.size);
+        this.x = clamp(this.x, 0, this.worldSize - 1);
+        this.y = clamp(this.y, 0, this.worldSize - 1);
         return successful;
     }
     makeFacing(direction) {
@@ -136,21 +136,24 @@ export class ClientPlayer {
         switch (message.type) {
             case "playerInfo":
                 // set score, name and colour
-                if (message.data.score) {
-                    this.setScore(message.data.score);
-                }
-                if (message.data.colour) {
-                    this.colour = message.data.colour;
-                    this.colourEl.style.backgroundColor = this.colour;
-                }
-                if (message.data.name) {
-                    this.name = message.data.name;
-                    this.nameEl.innerText = this.name;
-                }
+                this.handlePlayerInfoMessage(message.data);
                 break;
             default:
                 console.log(message);
                 break;
+        }
+    }
+    handlePlayerInfoMessage(data) {
+        if (data.score) {
+            this.setScore(data.score);
+        }
+        if (data.colour) {
+            this.colour = data.colour;
+            this.colourEl.style.backgroundColor = this.colour;
+        }
+        if (data.name) {
+            this.name = data.name;
+            this.nameEl.innerText = this.name;
         }
     }
     makeFacing(dir) {
@@ -172,7 +175,6 @@ export class ClientPlayer {
         elements.forEach((element, index) => {
             if (element) {
                 element.addEventListener("touchstart", (e) => {
-                    console.log(`Touchstart: ${dirArr[index]}`);
                     e.preventDefault();
                     e.stopPropagation();
                     this.makeFacing(dirArr[index]);
@@ -181,17 +183,9 @@ export class ClientPlayer {
             addShortcut({
                 hotkey: hotkeyArr[index],
                 callback: () => {
-                    console.log(`Making facing ${dirArr[index]}`);
                     this.makeFacing(dirArr[index]);
                 }
             });
         });
     }
-}
-function clamp(val, min, max) {
-    return Math.min(max, Math.max(val, min));
-}
-function boundedBy(val, min, max) {
-    // include lower bound exclude upper bound
-    return val >= min && val < max;
 }
