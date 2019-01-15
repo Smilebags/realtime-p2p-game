@@ -7,7 +7,7 @@ import {
 
 import addShortcut from "./shortcut.js";
 
-export class Player {
+export class HostPlayer {
     x: number;
     y: number;
     name: string;

@@ -1,4 +1,4 @@
-import { Player } from "./player.js";
+import { HostPlayer } from "./player.js";
 
 export type IPeerMessage =  {type: "ping", data: Ping} |
                             {type: "playerData", data: IPlayerData} |
@@ -20,7 +20,7 @@ interface IRegisterPlayer {
 type Ping = Number;
 
 export interface IServerData {
-    playerList: Player[];
+    playerList: HostPlayer[];
     context: CanvasRenderingContext2D;
     canvas: HTMLCanvasElement;
 }

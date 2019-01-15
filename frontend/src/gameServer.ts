@@ -1,11 +1,11 @@
 import {
     IPeerMessage, IConnection
 } from "./types";
-import { Player } from "./player.js";
+import { HostPlayer } from "./player.js";
 import { Entity } from "./entities.js";
 
 export class GameServer {
-    playerList: Player[];
+    playerList: HostPlayer[];
     entityList: Entity[];
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
@@ -31,8 +31,8 @@ export class GameServer {
         this.render();
     }
 
-    addPlayer(name: string, connection: IConnection): Player {
-        let newPlayer: Player = new Player({
+    addPlayer(name: string, connection: IConnection): HostPlayer {
+        let newPlayer: HostPlayer = new HostPlayer({
             name,
             location: "host",
             canvasContext: this.context,
@@ -44,7 +44,7 @@ export class GameServer {
         return newPlayer;
     }
 
-    findPlayerByName(name: string): Player | null {
+    findPlayerByName(name: string): HostPlayer | null {
         return this.playerList.find((player) => {
             return player.name === name;
         }) || null;
@@ -67,10 +67,10 @@ export class GameServer {
     handleMessage(message: IPeerMessage, connection: IConnection): void {
         switch (message.type) {
             case "registerPlayer":
-                let newPlayer: Player = this.addPlayer(message.data.name, connection);
+                let newPlayer: HostPlayer = this.addPlayer(message.data.name, connection);
                 break;
             case "playerData":
-                let player: Player | null = this.findPlayerByName(message.data.name);
+                let player: HostPlayer | null = this.findPlayerByName(message.data.name);
                 if (player) {
                     // player.setPos(message.data.x, message.data.y);
                     player.facing = message.data.facing;
