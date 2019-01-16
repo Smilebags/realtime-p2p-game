@@ -81,7 +81,7 @@ export class HostPlayer {
 
         }
     }
-    private update(): void {
+    update(): void {
         this.connection.send({
             type: "playerInfo",
             data: {
@@ -145,7 +145,6 @@ export class HostPlayer {
             this.tail.shift();
             this.addPoint(-1);
         }
-        this.update();
     }
 
     handleMessage(message: IPeerMessage): void {

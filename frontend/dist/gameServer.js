@@ -163,6 +163,9 @@ export class GameServer {
         if (playerScoreChanged) {
             this.updateScoreboard();
         }
+        this.playerList.forEach((player) => {
+            player.update();
+        });
         this.tickCount++;
     }
 }

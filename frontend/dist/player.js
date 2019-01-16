@@ -101,7 +101,6 @@ export class HostPlayer {
             this.tail.shift();
             this.addPoint(-1);
         }
-        this.update();
     }
     handleMessage(message) {
         console.log(message);

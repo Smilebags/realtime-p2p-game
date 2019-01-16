@@ -1,10 +1,10 @@
 Create diagram of system
 Finish off user interaction in error cases
-Fix one tick delay in score being sent to client
 Fix score not hitting 0 on client
 Remove disconnected users from game
 Fix second player not moving bug
 Handle disconnection and reconnection
+Fix bug causing all generated colours to be green
 
 # Future
 Add game options before start - world size and resolution, and game speed (food rate too?)
