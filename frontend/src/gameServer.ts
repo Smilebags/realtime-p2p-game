@@ -5,6 +5,7 @@ import { hslToHex } from "./util.js";
 
 export class GameServer {
     id: string;
+    paused: boolean;
     playerList: HostPlayer[];
     entityList: Food[];
     canvas: HTMLCanvasElement;
@@ -14,6 +15,7 @@ export class GameServer {
     gametickSpeed: number;
     tickCount: number;
     constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, id: string, scoreboardEl: HTMLOListElement) {
+        this.paused = true;
         this.id = id;
         this.playerList = [];
         this.entityList = [];
@@ -42,6 +44,9 @@ export class GameServer {
             colour: makePlayerColour(name),
             connection
         });
+        if(!this.playerList.length && this.paused) {
+            this.paused = false;
+        }
         this.playerList.push(newPlayer);
         this.updateScoreboard();
         return newPlayer;
@@ -79,6 +84,10 @@ export class GameServer {
         });
     }
 
+    togglePause(): void {
+        this.paused = !this.paused;
+    }
+
     render(): void {
         this.context.clearRect(0,0,this.canvas.width, this.canvas.height);
         this.entityList.forEach((entity) => {
@@ -110,6 +119,9 @@ export class GameServer {
     }
 
     gametick(): void {
+        if(this.paused) {
+            return;
+        }
         let playerScoreChanged: boolean = false;
         // gametick all players
         this.playerList.forEach((player) => {

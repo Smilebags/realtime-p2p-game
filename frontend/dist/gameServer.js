@@ -3,6 +3,7 @@ import { Food } from "./entities.js";
 import { hslToHex } from "./util.js";
 export class GameServer {
     constructor(canvas, worldSize, canvasSize, id, scoreboardEl) {
+        this.paused = true;
         this.id = id;
         this.playerList = [];
         this.entityList = [];
@@ -30,6 +31,9 @@ export class GameServer {
             colour: makePlayerColour(name),
             connection
         });
+        if (!this.playerList.length && this.paused) {
+            this.paused = false;
+        }
         this.playerList.push(newPlayer);
         this.updateScoreboard();
         return newPlayer;
@@ -47,7 +51,7 @@ export class GameServer {
             };
         });
         scores = scores.sort((a, b) => {
-            return a.score >= b.score ? 1 : -1;
+            return a.score <= b.score ? 1 : -1;
         });
         this.scoreboard.innerHTML = "";
         scores.forEach((scoreItem) => {
@@ -62,6 +66,9 @@ export class GameServer {
             li.appendChild(scoreEl);
             this.scoreboard.appendChild(li);
         });
+    }
+    togglePause() {
+        this.paused = !this.paused;
     }
     render() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -91,6 +98,9 @@ export class GameServer {
         }
     }
     gametick() {
+        if (this.paused) {
+            return;
+        }
         let playerScoreChanged = false;
         // gametick all players
         this.playerList.forEach((player) => {

@@ -115,8 +115,10 @@ function makeGameServer() {
         const peer = new Peer(generateID());
         const canvas = document.querySelector("canvas");
         const scoreboardEl = document.querySelector(".scoreboard");
-        let serverIdEl = document.querySelector(".serverId");
-        let server = yield new Promise((resolve, reject) => {
+        const serverIdEl = document.querySelector(".serverId");
+        // await the creation and connection of the server
+        // so that the function doesn't return until the server is ready
+        const server = yield new Promise((resolve, reject) => {
             const server = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
             peer.on("open", function (id) {
                 resolve(server);
@@ -155,6 +157,16 @@ function makeGameServer() {
             shareLink.innerText = location.href + "?game=" + server.id;
             shareLinkEl.appendChild(shareLink);
         }
+        const pauseEl = document.querySelector(".pause");
+        pauseEl.addEventListener("click", (clickEvent) => {
+            server.togglePause();
+            if (pauseEl.innerText === "Pause") {
+                pauseEl.innerText = "Resume";
+            }
+            else {
+                pauseEl.innerText = "Pause";
+            }
+        });
     });
 }
 function setPage(pageName) {

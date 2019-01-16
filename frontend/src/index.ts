@@ -6,6 +6,7 @@ import {
 import { GameServer } from "./gameServer.js";
 import { ClientPlayer } from "./player.js";
 import { generateID } from "./util.js";
+import { constants } from "http2";
 
 const worldSize: number = 30;
 
@@ -115,10 +116,11 @@ async function makeGameServer(): Promise<void> {
     const peer: PeerJs.Peer = new Peer(generateID());
     const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
     const scoreboardEl: HTMLOListElement = <HTMLOListElement>document.querySelector(".scoreboard");
-    let serverIdEl: HTMLElement = <HTMLElement>document.querySelector(".serverId");
+    const serverIdEl: HTMLElement = <HTMLElement>document.querySelector(".serverId");
 
-
-    let server: GameServer = await new Promise((resolve, reject) => {
+    // await the creation and connection of the server
+    // so that the function doesn't return until the server is ready
+    const server: GameServer = await new Promise((resolve, reject) => {
         const server: GameServer = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
 
         peer.on("open", function (id: string): void {
@@ -160,6 +162,16 @@ async function makeGameServer(): Promise<void> {
         shareLink.innerText = location.href + "?game=" + server.id;
         shareLinkEl.appendChild(shareLink);
     }
+
+    const pauseEl: HTMLElement = <HTMLElement>document.querySelector(".pause");
+    pauseEl.addEventListener("click", (clickEvent) => {
+        server.togglePause();
+        if(pauseEl.innerText === "Pause") {
+            pauseEl.innerText = "Resume";
+        } else {
+            pauseEl.innerText = "Pause";
+        }
+    });
 }
 
 function setPage(pageName: string): void {

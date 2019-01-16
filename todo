@@ -3,8 +3,6 @@ Finish off user interaction in error cases
 Fix one tick delay in score being sent to client
 Fix score not hitting 0 on client
 Remove disconnected users from game
-Enable game pause
-Make game pause when no players are connected
 Fix second player not moving bug
 Handle disconnection and reconnection
 
