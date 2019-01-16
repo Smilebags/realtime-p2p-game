@@ -172,10 +172,11 @@ export class GameServer {
 function makePlayerColour(str) {
     // generate a large random ish number based on the input string
     let strSum = 1;
-    Array(str).forEach((letter) => {
+    Array.from(str).forEach((letter) => {
         strSum *= letter.charCodeAt(0);
         strSum = strSum % 10000;
     });
     let brightness = (Math.random() * 50) + 25;
+    console.log(hslToHex(strSum % 360, 50, brightness));
     return hslToHex(strSum % 360, 50, brightness);
 }
