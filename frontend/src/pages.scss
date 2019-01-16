@@ -1,0 +1,64 @@
+
+body > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    transform: translateX(0);
+    transition: transform 0.2s;
+}
+
+[data-page="select"] {
+    .page-select {
+        transform: translateX(0%);
+    }
+    .page-get-id, .page-get-name, .page-controller, .page-host {
+        transform: translateX(-100%);
+    }
+}
+
+[data-page="get-id"] {
+    .page-select {
+        transform: translateX(100%);
+    }
+    .page-get-id {
+        transform: translateX(0%);
+    }
+    .page-get-name, .page-controller, .page-host {
+        transform: translateX(-100%);
+    }
+}
+
+[data-page="get-name"] {
+    .page-select, .page-get-id {
+        transform: translateX(100%);
+    }
+    .page-get-name {
+        transform: translateX(0%);
+    }
+    .page-controller, .page-host {
+        transform: translateX(-100%);
+    }
+}
+
+[data-page="controller"] {
+    .page-select, .page-get-id, .page-get-name {
+        transform: translateX(100%);
+    }
+    .page-controller {
+        transform: translateX(0%);
+    }
+    .page-host {
+        transform: translateX(-100%);
+    }
+}
+
+[data-page="host"] {
+    .page-select, .page-get-id, .page-get-name, .page-controller {
+        transform: translateX(100%);
+    }
+    .page-host {
+        transform: translateX(0%);
+    }
+}

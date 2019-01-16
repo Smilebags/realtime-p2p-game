@@ -8,7 +8,8 @@
     "peer-server": "peerjs --port 9000 --key peerjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "backend-build": "tsc -p ./server/src/tsconfig.json",
-    "frontend-build": "tsc -p ./frontend/src/tsconfig.json"
+    "frontend-build": "tsc -p ./frontend/src/tsconfig.json",
+    "styles-build": "npx sass ./frontend/src/main.scss ./frontend/dist/main.css"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.16.0",
-    "@types/peerjs": "0.0.30"
+    "@types/peerjs": "0.0.30",
+    "sass": "^1.16.0"
   }
 }

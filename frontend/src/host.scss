@@ -1,0 +1,61 @@
+.page-host {
+    position: relative;
+    display: grid;
+    grid-template-areas: "sidebar .  game .";
+    grid-template-columns: 25vmin 1fr calc(100vmin - 2vmin) 1fr;
+    padding: 1vmin;
+    grid-gap: 1vmin;
+    height: 100vh;
+    width: 100vw;
+}
+
+.page-host .sidebar {
+    border: 1px solid black;
+    display: grid;
+    padding: 1vmin;
+    grid-gap: 1vmin;
+    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-areas: "id" "scoretitle" "scoreboard" "." "menu";
+}
+
+.page-host .sidebar .serverId {
+    display: block;
+    width: 100%;
+    font-size: 2em;
+    font-weight: 600;
+    text-align: center;
+}
+
+.page-host .sidebar .scoreboard {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 4em;
+    grid-gap: 8px;
+}
+.page-host .sidebar .scoreboard li {
+    display: contents;
+}
+
+.page-host .sidebar .menu {
+    grid-area: menu;
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+}
+
+canvas {
+    grid-area: game;
+    width: 100%;
+    z-index: -1;
+    border: 1px solid black;
+}
+
+/* portrait */
+@media(max-aspect-ratio: 5/4) {
+    .page-host {
+        grid-template-columns: 1fr;
+        grid-template-rows: 20vmin 1fr 98vmin;
+        grid-template-areas: "scoreboard" "." "game";
+
+    }
+}

@@ -1,195 +1,205 @@
 html, body {
-    padding: 0;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-*  {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-.role-select {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
-    transform: translateX(0);
-    transition: 0.2s;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+.page-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
-.role-select > div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.page-select > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.role-select button {
-    appearance: none;
-    -webkit-appearance: none;
-    padding: 0;
-    margin: 0;
-    display: block;
-    border: none;
+.page-select button {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+  border: none;
 }
 
-
-.player-controls {
-    display: grid;
-    width: 100vw;
-    height: 100vh;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    grid-template-areas: "info up ." " left down right";
-    grid-gap: 16px;
-    padding: 16px;
+.page-controller {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas: "info up ." " left down right";
+  grid-gap: 16px;
+  padding: 16px;
+}
+.page-controller .directions {
+  display: contents;
+}
+.page-controller .up,
+.page-controller .left,
+.page-controller .down,
+.page-controller .right {
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.page-controller .up {
+  grid-area: up;
+}
+.page-controller .left {
+  grid-area: left;
+}
+.page-controller .down {
+  grid-area: down;
+}
+.page-controller .right {
+  grid-area: right;
+}
+.page-controller .colour {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12vmin;
 }
 
 @media (orientation: portrait) {
-    .player-controls {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: 2fr 1fr 1fr;
-        grid-template-areas: "info info info" ". up ." "left down right";
-    }
+  .page-controller {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 2fr 1fr 1fr;
+    grid-template-areas: "info info info" ". up ." "left down right";
+  }
+}
+.page-host {
+  position: relative;
+  display: grid;
+  grid-template-areas: "sidebar .  game .";
+  grid-template-columns: 25vmin 1fr calc(100vmin - 2vmin) 1fr;
+  padding: 1vmin;
+  grid-gap: 1vmin;
+  height: 100vh;
+  width: 100vw;
 }
 
-.player-controls .directions {
-    display: contents;
+.page-host .sidebar {
+  border: 1px solid black;
+  display: grid;
+  padding: 1vmin;
+  grid-gap: 1vmin;
+  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-areas: "id" "scoretitle" "scoreboard" "." "menu";
 }
 
-.player-controls .up,
-.player-controls .left,
-.player-controls .down,
-.player-controls .right {
-    background-color: #333;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
+.page-host .sidebar .serverId {
+  display: block;
+  width: 100%;
+  font-size: 2em;
+  font-weight: 600;
+  text-align: center;
 }
 
-.player-controls .up {
-    grid-area: up;
-}
-.player-controls .left {
-    grid-area: left;
-}
-.player-controls .down {
-    grid-area: down;
-}
-.player-controls .right {
-    grid-area: right;
+.page-host .sidebar .scoreboard {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 4em;
+  grid-gap: 8px;
 }
 
-.player-controls .colour {
-    grid-area: info;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 12vmin
+.page-host .sidebar .scoreboard li {
+  display: contents;
 }
 
-.player-config, .player-controls, .server-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
-    transform: translateX(100%);
-    transition: 0.2s;
-}
-
-.role-server .server-screen {
-    transform: translateX(0);
-}
-
-.role-server .role-select, .role-player .role-select {
-    transform: translateX(-100%);
-}
-
-
-.role-player .player-config {
-    transform: translateX(0);
-}
-
-.game-connected .player-config {
-    transform: translateX(-100%);
-}
-
-.game-connected .player-controls {
-    transform: translateX(0);
-}
-
-
-.server-screen {
-    position: relative;
-    display: grid;
-    grid-template-areas: "sidebar .  game .";
-    grid-template-columns: 25vmin 1fr calc(100vmin - 2vmin) 1fr;
-    padding: 1vmin;
-    grid-gap: 1vmin;
-    height: 100vh;
-    width: 100vw;
-}
-
-.server-screen .sidebar {
-    border: 1px solid black;
-    display: grid;
-    padding: 1vmin;
-    grid-gap: 1vmin;
-    grid-template-rows: auto auto auto 1fr auto;
-    grid-template-areas: "id" "scoretitle" "scoreboard" "." "menu";
-}
-
-.server-screen .sidebar .serverId {
-    display: block;
-    width: 100%;
-    font-size: 2em;
-    font-weight: 600;
-    text-align: center;
-}
-
-.server-screen .sidebar .scoreboard {
-    list-style: none;
-    display: grid;
-    grid-template-columns: 1fr 4em;
-    grid-gap: 8px;
-}
-.server-screen .sidebar .scoreboard li {
-    display: contents;
-}
-
-.server-screen .sidebar .menu {
-    grid-area: menu;
-    display: grid;
-    width: 100%;
-    grid-template-columns: 1fr 1fr;
+.page-host .sidebar .menu {
+  grid-area: menu;
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
 }
 
 canvas {
-    grid-area: game;
-    width: 100%;
-    z-index: -1;
-    border: 1px solid black;
+  grid-area: game;
+  width: 100%;
+  z-index: -1;
+  border: 1px solid black;
 }
 
 /* portrait */
-@media(max-aspect-ratio: 5/4) {
-    .server-screen {
-        grid-template-columns: 1fr;
-        grid-template-rows: 20vmin 1fr calc(80vmin - 2vmin) 1fr;
-        grid-template-areas: "scoreboard" "." "game" ".";
-
-    }
+@media (max-aspect-ratio: 5/4) {
+  .page-host {
+    grid-template-columns: 1fr;
+    grid-template-rows: 20vmin 1fr 98vmin;
+    grid-template-areas: "scoreboard" "." "game";
+  }
 }
+body > div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  transform: translateX(0);
+  transition: transform 0.2s;
+}
+
+[data-page=select] .page-select {
+  transform: translateX(0%);
+}
+[data-page=select] .page-get-id, [data-page=select] .page-get-name, [data-page=select] .page-controller, [data-page=select] .page-host {
+  transform: translateX(-100%);
+}
+
+[data-page=get-id] .page-select {
+  transform: translateX(100%);
+}
+[data-page=get-id] .page-get-id {
+  transform: translateX(0%);
+}
+[data-page=get-id] .page-get-name, [data-page=get-id] .page-controller, [data-page=get-id] .page-host {
+  transform: translateX(-100%);
+}
+
+[data-page=get-name] .page-select, [data-page=get-name] .page-get-id {
+  transform: translateX(100%);
+}
+[data-page=get-name] .page-get-name {
+  transform: translateX(0%);
+}
+[data-page=get-name] .page-controller, [data-page=get-name] .page-host {
+  transform: translateX(-100%);
+}
+
+[data-page=controller] .page-select, [data-page=controller] .page-get-id, [data-page=controller] .page-get-name {
+  transform: translateX(100%);
+}
+[data-page=controller] .page-controller {
+  transform: translateX(0%);
+}
+[data-page=controller] .page-host {
+  transform: translateX(-100%);
+}
+
+[data-page=host] .page-select, [data-page=host] .page-get-id, [data-page=host] .page-get-name, [data-page=host] .page-controller {
+  transform: translateX(100%);
+}
+[data-page=host] .page-host {
+  transform: translateX(0%);
+}
+
+/*# sourceMappingURL=main.css.map */
