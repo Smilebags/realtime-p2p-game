@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-page="select">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,18 +10,21 @@
     <script src="index.js" type="module"></script>
 </head>
 <body>
-    <div class="role-select">
+    <div class="page-select">
         <button class="player">Join Game</button>
         <button class="server">Host Game</button>
     </div>
-    <div class="player-config">
+    <div class="page-get-id">
         <label for="serverId">Game ID:</label>
         <input type="text" id="serverId" name="serverId" class="id">
-        <label for="playerName">Your name:</label>
-        <input type="text" id="playerName" name="playerName" class="player-name">
         <button class="connect">Connect</button>
     </div>
-    <div class="player-controls">
+    <div class="page-get-name">
+        <label for="playerName">Your name:</label>
+        <input type="text" id="playerName" name="playerName" class="player-name">
+        <button class="join">Join</button>
+    </div>
+    <div class="page-controller">
         <div class="directions">
             <div class="up">⮝</div>
             <div class="left">⮜</div>
@@ -34,9 +37,10 @@
         </div>
 
     </div>
-    <div class="server-screen">
+    <div class="page-host">
         <div class="sidebar">
                 <span class="serverId">Loading</span>
+                <div class="sharelink"></div>
                 <h2>Scoreboard</h2>
                 <ol class="scoreboard">
                 </ol>

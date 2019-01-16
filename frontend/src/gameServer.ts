@@ -43,6 +43,7 @@ export class GameServer {
             connection
         });
         this.playerList.push(newPlayer);
+        this.updateScoreboard();
         return newPlayer;
     }
 

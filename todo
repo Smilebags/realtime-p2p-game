@@ -1,6 +1,4 @@
 Create diagram of system
-Add easier way to join game (create join link on game host)
-    Implement auto-ID fill in and connect when hitting webpage with a query string
 Make PeerJS a proper import in TS rather than patching types and assuming runtime presence
 Finish off user interaction in error cases
 Fix one tick delay in score being sent to client

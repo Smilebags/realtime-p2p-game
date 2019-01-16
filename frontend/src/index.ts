@@ -9,46 +9,36 @@ import { generateID } from "./util.js";
 
 const worldSize: number = 30;
 
-document.addEventListener("DOMContentLoaded", () => {
-    let connectEl: HTMLElement | null = document.querySelector(".connect");
-    let serverEl: HTMLElement | null = document.querySelector(".server");
-    let playerEl: HTMLElement | null = document.querySelector(".player");
-    let serverIdEl: HTMLElement | null = document.querySelector(".serverId");
-    if(serverEl) {
-        serverEl.addEventListener("click", async () => {
-            // set up server Peer and display ID
-            document.documentElement.classList.add("role-server");
+document.addEventListener("DOMContentLoaded", async () => {
+    // join game quickly if the game query is present
+    const urlParams: URLSearchParams = new URLSearchParams(window.location.search);
+    const gameId: string | null = urlParams.get("game");
+    if(gameId) {
+        // get player name
+        let playerName: string = await getPlayerName();
+        // join game
+        await joinGame(gameId, playerName);
+        setPage("controller");
+    }
+    let serverEl: HTMLElement = <HTMLElement>document.querySelector(".server");
+    let playerEl: HTMLElement = <HTMLElement>document.querySelector(".player");
 
-            const peer: PeerJs.Peer = new Peer(generateID());
-            const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-            const scoreboard: HTMLOListElement = <HTMLOListElement>document.querySelector(".scoreboard");
-            const server: GameServer = await makeGameServer(canvas, peer, scoreboard);
-            if(serverIdEl) {
-                serverIdEl.innerHTML = `Game ID: ${server.id}`;
-            }
-        });
-    }
-    if(playerEl) {
-        playerEl.addEventListener("click", () => {
-            // show UI to join a game by ID
-            document.documentElement.classList.add("role-player");
-        });
-    }
-    if(connectEl) {
-        connectEl.addEventListener("click", async () => {
-            let id: string = (<HTMLInputElement>(document.querySelector(".id"))).value;
-            let name: string = (<HTMLInputElement>(document.querySelector(".player-name"))).value;
-            if(id.length && name.length) {
-                await joinGame(id);
-                document.documentElement.classList.add("game-connected");
-            } else {
-                // tell the user they need to enter both name and game ID
-            }
-        });
-    }
+    serverEl.addEventListener("click", async () => {
+        await makeGameServer();
+        setPage("host");
+    });
+    playerEl.addEventListener("click", async () => {
+        // get game ID
+        let gameId: string = await getGameId();
+        // get player name
+        let playerName: string = await getPlayerName();
+        // join game
+        await joinGame(gameId, playerName);
+        setPage("controller");
+    });
 });
 
-function joinGame(id: string): Promise<void> {
+async function joinGame(id: string, name: string): Promise<void> {
     return new Promise((resolve, reject) => {
         let peer: PeerJs.Peer = new Peer(generateID(16));
 
@@ -67,7 +57,7 @@ function joinGame(id: string): Promise<void> {
             let colourEl: HTMLDivElement | null = document.querySelector(".colour");
             if(upEl && leftEl && downEl && rightEl && nameEl && scoreEl && colourEl) {
                 let player: ClientPlayer = new ClientPlayer({
-                    name: (<HTMLInputElement>document.querySelector(".player-name")).value,
+                    name: name,
                     connection: conn,
                     buttonElements: [upEl, leftEl, downEl, rightEl],
                     nameEl,
@@ -83,9 +73,52 @@ function joinGame(id: string): Promise<void> {
     });
 }
 
+async function getPlayerName(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        // transition page to page-get-name
+        setPage("get-name");
+        let joinEl: HTMLElement = <HTMLElement>document.querySelector(".page-get-name .join");
+        joinEl.addEventListener("click", async () => {
+            let name: string = (<HTMLInputElement>(document.querySelector(".page-get-name .player-name"))).value;
+            // if it is valid, return the value, otherwise show a suitable error to user
+            if(name.length) {
+                resolve(name);
+            } else {
+                // tell the user they need to enter a name
+            }
+        });
+    });
+}
 
-function makeGameServer(canvas: HTMLCanvasElement, peer: PeerJs.Peer, scoreboardEl: HTMLOListElement): Promise<GameServer> {
-    return new Promise((resolve, reject) => {
+async function getGameId(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        // transition page to page-get-id
+        setPage("get-id");
+        let connectEl: HTMLElement = <HTMLElement>document.querySelector(".page-get-id .connect");
+        // wait for click on connect
+        // if it is valid, return the value, otherwise show a suitable error to user
+        connectEl.addEventListener("click", async () => {
+            let id: string = (<HTMLInputElement>(document.querySelector(".page-get-id .id"))).value;
+            if(id.length) {
+                resolve(id);
+            } else {
+                // tell the user they need to enter a game ID
+            }
+        });
+    });
+}
+
+async function makeGameServer(): Promise<void> {
+    // set up server Peer and display ID
+    setPage("host");
+
+    const peer: PeerJs.Peer = new Peer(generateID());
+    const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
+    const scoreboardEl: HTMLOListElement = <HTMLOListElement>document.querySelector(".scoreboard");
+    let serverIdEl: HTMLElement = <HTMLElement>document.querySelector(".serverId");
+
+
+    let server: GameServer = await new Promise((resolve, reject) => {
         const server: GameServer = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
 
         peer.on("open", function (id: string): void {
@@ -117,5 +150,18 @@ function makeGameServer(canvas: HTMLCanvasElement, peer: PeerJs.Peer, scoreboard
             }, 1000);
         });
     });
+    if(serverIdEl) {
+        serverIdEl.innerHTML = `Game ID: ${server.id}`;
+    }
+    let shareLinkEl: HTMLDivElement = <HTMLDivElement>document.querySelector(".sharelink");
+    if(shareLinkEl) {
+        const shareLink: HTMLAnchorElement = document.createElement("a");
+        shareLink.href = location.href + "?game=" + server.id;
+        shareLink.innerText = location.href + "?game=" + server.id;
+        shareLinkEl.appendChild(shareLink);
+    }
 }
 
+function setPage(pageName: string): void {
+    document.documentElement.setAttribute("data-page", pageName);
+}
