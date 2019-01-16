@@ -13,28 +13,22 @@ html, body {
     box-sizing: border-box;
 }
 
-
-
-// front page
-
 .page-select {
     display: grid;
     grid-template-columns: 1fr 1fr;
-}
-
-.page-select > div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.page-select button {
-    appearance: none;
-    -webkit-appearance: none;
-    padding: 0;
-    margin: 0;
-    display: block;
-    border: none;
+    &> div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    button {
+        appearance: none;
+        -webkit-appearance: none;
+        padding: 0;
+        margin: 0;
+        display: block;
+        border: none;
+    }
 }
 
 @import "controller.scss";
