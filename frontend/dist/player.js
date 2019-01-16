@@ -10,12 +10,12 @@ export class HostPlayer {
         this.worldSize = options.worldSize;
         this.tail = [];
         this.facing = "down";
-        this.tailLength = 0;
+        this.score = 0;
         this.colour = options.colour || "#000000";
         this.connection.send({
             type: "playerInfo",
             data: {
-                score: this.tailLength,
+                score: this.score,
                 name: this.name,
                 colour: this.colour,
             }
@@ -24,7 +24,7 @@ export class HostPlayer {
     render() {
         if (this.ctx) {
             // draw the tail
-            if (this.tailLength > 0) {
+            if (this.score > 0) {
                 this.ctx.beginPath();
                 this.ctx.fillStyle = "#333333";
                 this.tail.forEach((tailItem) => {
@@ -47,7 +47,7 @@ export class HostPlayer {
         this.connection.send({
             type: "playerInfo",
             data: {
-                score: this.tailLength
+                score: this.score
             }
         });
     }
@@ -81,7 +81,7 @@ export class HostPlayer {
         this.y = y;
     }
     addPoint(points = 1) {
-        this.tailLength = Math.max(this.tailLength + points, 0);
+        this.score = Math.max(this.score + points, 0);
     }
     gametick() {
         let oldX = this.x;
@@ -93,7 +93,7 @@ export class HostPlayer {
             this.tail.push({ x: oldX, y: oldY });
         }
         // clip the tail (from 0) if it is longer than it should be
-        while (this.tail.length > this.tailLength && this.tail.length !== 0) {
+        while (this.tail.length > this.score && this.tail.length !== 0) {
             this.tail.shift();
         }
         // remove the last tail position if the walk was unsuccessful

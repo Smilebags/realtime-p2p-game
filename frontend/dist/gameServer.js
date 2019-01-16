@@ -2,13 +2,14 @@ import { HostPlayer } from "./player.js";
 import { Food } from "./entities.js";
 import { hslToHex } from "./util.js";
 export class GameServer {
-    constructor(canvas, worldSize, canvasSize, id) {
+    constructor(canvas, worldSize, canvasSize, id, scoreboardEl) {
         this.id = id;
         this.playerList = [];
         this.entityList = [];
         this.canvas = canvas;
         this.canvas.width = canvasSize;
         this.canvas.height = canvasSize;
+        this.scoreboard = scoreboardEl;
         this.worldSize = worldSize;
         this.context = canvas.getContext("2d");
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
@@ -36,6 +37,27 @@ export class GameServer {
         return this.playerList.find((player) => {
             return player.name === name;
         }) || null;
+    }
+    updateScoreboard() {
+        let scores = this.playerList.map((player) => {
+            return {
+                name: player.name,
+                score: player.score
+            };
+        });
+        this.scoreboard.innerHTML = "";
+        scores.forEach((scoreItem) => {
+            let li = document.createElement("li");
+            let nameEl = document.createElement("div");
+            nameEl.classList.add("scoreboard-name");
+            nameEl.innerText = scoreItem.name;
+            let scoreEl = document.createElement("div");
+            scoreEl.classList.add("scoreboard-score");
+            scoreEl.innerText = String(scoreItem.score);
+            li.appendChild(nameEl);
+            li.appendChild(scoreEl);
+            this.scoreboard.appendChild(li);
+        });
     }
     render() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -65,6 +87,7 @@ export class GameServer {
         }
     }
     gametick() {
+        let playerScoreChanged = false;
         // gametick all players
         this.playerList.forEach((player) => {
             player.gametick();
@@ -75,6 +98,7 @@ export class GameServer {
                 if (player.x === entity.x && player.y === entity.y) {
                     this.entityList.splice(index, 1);
                     player.addPoint();
+                    playerScoreChanged = true;
                 }
             });
         });
@@ -89,6 +113,7 @@ export class GameServer {
                     // add one since the array index starts from 0
                     // and we don't want to take 0 points if on the last item
                     player.addPoint(index * -1);
+                    playerScoreChanged = true;
                 }
             });
         });
@@ -107,6 +132,7 @@ export class GameServer {
                             // give the tail from player2 to player1
                             player1.addPoint(index);
                             player2.addPoint(index * -1);
+                            playerScoreChanged = true;
                         }
                     });
                 }
@@ -119,6 +145,9 @@ export class GameServer {
                 y: Math.floor(Math.random() * (this.worldSize + 1)),
                 ctx: this.context
             }));
+        }
+        if (playerScoreChanged) {
+            this.updateScoreboard();
         }
         this.tickCount++;
     }

@@ -8,18 +8,19 @@ export class GameServer {
     playerList: HostPlayer[];
     entityList: Food[];
     canvas: HTMLCanvasElement;
+    scoreboard: HTMLOListElement;
     context: CanvasRenderingContext2D;
     worldSize: number;
     gametickSpeed: number;
     tickCount: number;
-    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, id: string) {
+    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, id: string, scoreboardEl: HTMLOListElement) {
         this.id = id;
         this.playerList = [];
         this.entityList = [];
         this.canvas = canvas;
         this.canvas.width = canvasSize;
         this.canvas.height = canvasSize;
-
+        this.scoreboard = scoreboardEl;
         this.worldSize = worldSize;
         this.context = <CanvasRenderingContext2D>canvas.getContext("2d");
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
@@ -49,6 +50,29 @@ export class GameServer {
         return this.playerList.find((player) => {
             return player.name === name;
         }) || null;
+    }
+
+    updateScoreboard(): void {
+        let scores: {name: string, score: number}[] = this.playerList.map((player) => {
+            return {
+                name: player.name,
+                score: player.score
+            };
+        });
+        this.scoreboard.innerHTML = "";
+        scores.forEach((scoreItem) => {
+            let li: HTMLLIElement = document.createElement("li");
+            let nameEl: HTMLDivElement = document.createElement("div");
+            nameEl.classList.add("scoreboard-name");
+            nameEl.innerText = scoreItem.name;
+            let scoreEl: HTMLDivElement = document.createElement("div");
+            scoreEl.classList.add("scoreboard-score");
+            scoreEl.innerText = String(scoreItem.score);
+
+            li.appendChild(nameEl);
+            li.appendChild(scoreEl);
+            this.scoreboard.appendChild(li);
+        });
     }
 
     render(): void {
@@ -82,6 +106,7 @@ export class GameServer {
     }
 
     gametick(): void {
+        let playerScoreChanged: boolean = false;
         // gametick all players
         this.playerList.forEach((player) => {
             player.gametick();
@@ -93,6 +118,7 @@ export class GameServer {
                 if (player.x === entity.x && player.y === entity.y) {
                     this.entityList.splice(index, 1);
                     player.addPoint();
+                    playerScoreChanged = true;
                 }
             });
         });
@@ -108,6 +134,7 @@ export class GameServer {
                     // add one since the array index starts from 0
                     // and we don't want to take 0 points if on the last item
                     player.addPoint(index * -1);
+                    playerScoreChanged = true;
                 }
             });
         });
@@ -128,6 +155,7 @@ export class GameServer {
                         // give the tail from player2 to player1
                         player1.addPoint(index);
                         player2.addPoint(index * -1);
+                        playerScoreChanged = true;
                     }
                     });
                 }
@@ -143,6 +171,9 @@ export class GameServer {
             }));
         }
 
+        if(playerScoreChanged) {
+            this.updateScoreboard();
+        }
         this.tickCount++;
     }
 }

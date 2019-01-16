@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const peer: PeerJs.Peer = new Peer(generateID());
             const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
-
-            const server: GameServer = await makeGameServer(canvas, peer);
+            const scoreboard: HTMLOListElement = <HTMLOListElement>document.querySelector(".scoreboard");
+            const server: GameServer = await makeGameServer(canvas, peer, scoreboard);
             if(serverIdEl) {
                 serverIdEl.innerHTML = `Game ID: ${server.id}`;
             }
@@ -84,9 +84,9 @@ function joinGame(id: string): Promise<void> {
 }
 
 
-function makeGameServer(canvas: HTMLCanvasElement, peer: PeerJs.Peer): Promise<GameServer> {
+function makeGameServer(canvas: HTMLCanvasElement, peer: PeerJs.Peer, scoreboardEl: HTMLOListElement): Promise<GameServer> {
     return new Promise((resolve, reject) => {
-        const server: GameServer = new GameServer(canvas, worldSize, 1000, peer.id);
+        const server: GameServer = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
 
         peer.on("open", function (id: string): void {
             resolve(server);

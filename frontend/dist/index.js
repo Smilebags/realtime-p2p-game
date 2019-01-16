@@ -21,7 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.documentElement.classList.add("role-server");
             const peer = new Peer(generateID());
             const canvas = document.querySelector("canvas");
-            const server = yield makeGameServer(canvas, peer);
+            const scoreboard = document.querySelector(".scoreboard");
+            const server = yield makeGameServer(canvas, peer, scoreboard);
             if (serverIdEl) {
                 serverIdEl.innerHTML = `Game ID: ${server.id}`;
             }
@@ -77,9 +78,9 @@ function joinGame(id) {
         }));
     });
 }
-function makeGameServer(canvas, peer) {
+function makeGameServer(canvas, peer, scoreboardEl) {
     return new Promise((resolve, reject) => {
-        let server = new GameServer(canvas, worldSize, 1000, peer.id);
+        const server = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
         peer.on("open", function (id) {
             resolve(server);
             console.log("ID: " + id);
