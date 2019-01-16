@@ -46,6 +46,9 @@ export class GameServer {
                 score: player.score
             };
         });
+        scores = scores.sort((a, b) => {
+            return a.score >= b.score ? 1 : -1;
+        });
         this.scoreboard.innerHTML = "";
         scores.forEach((scoreItem) => {
             let li = document.createElement("li");
