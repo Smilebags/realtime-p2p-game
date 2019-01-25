@@ -1,6 +1,5 @@
 Create diagram of system
 Finish off user interaction in error cases
-Fix score not hitting 0 on client
 Remove disconnected users from game
 Fix second player not moving bug
 Handle disconnection and reconnection

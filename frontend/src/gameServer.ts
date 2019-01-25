@@ -26,7 +26,7 @@ export class GameServer {
         this.worldSize = worldSize;
         this.context = <CanvasRenderingContext2D>canvas.getContext("2d");
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
-        this.gametickSpeed = 500;
+        this.gametickSpeed = 300;
         this.tickCount = 0;
         this.gametick();
         setInterval(() => {
@@ -122,7 +122,6 @@ export class GameServer {
         if(this.paused) {
             return;
         }
-        let playerScoreChanged: boolean = false;
         // gametick all players
         this.playerList.forEach((player) => {
             player.gametick();
@@ -134,7 +133,6 @@ export class GameServer {
                 if (player.x === entity.x && player.y === entity.y) {
                     this.entityList.splice(index, 1);
                     player.addPoint();
-                    playerScoreChanged = true;
                 }
             });
         });
@@ -150,7 +148,6 @@ export class GameServer {
                     // add one since the array index starts from 0
                     // and we don't want to take 0 points if on the last item
                     player.addPoint(index * -1);
-                    playerScoreChanged = true;
                 }
             });
         });
@@ -171,7 +168,6 @@ export class GameServer {
                         // give the tail from player2 to player1
                         player1.addPoint(index);
                         player2.addPoint(index * -1);
-                        playerScoreChanged = true;
                     }
                     });
                 }
@@ -179,7 +175,7 @@ export class GameServer {
         });
 
         // add more food
-        if(this.tickCount % 10 === 0) {
+        if(this.tickCount % 5 === 0) {
             this.entityList.push(new Food({
                 x: Math.floor(Math.random() * (this.worldSize + 1)),
                 y: Math.floor(Math.random() * (this.worldSize + 1)),
@@ -187,9 +183,8 @@ export class GameServer {
             }));
         }
 
-        if(playerScoreChanged) {
-            this.updateScoreboard();
-        }
+        this.updateScoreboard();
+
         this.playerList.forEach((player) => {
             player.update();
         });

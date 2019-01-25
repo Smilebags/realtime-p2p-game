@@ -44,6 +44,7 @@ export class HostPlayer {
         }
     }
     update() {
+        console.log(this.score);
         this.connection.send({
             type: "playerInfo",
             data: {
@@ -92,15 +93,15 @@ export class HostPlayer {
             // add a new tail at the old head location
             this.tail.push({ x: oldX, y: oldY });
         }
-        // clip the tail (from 0) if it is longer than it should be
-        while (this.tail.length > this.score && this.tail.length !== 0) {
-            this.tail.shift();
-        }
-        // remove the last tail position if the walk was unsuccessful
-        if (!walked) {
-            this.tail.shift();
+        else {
+            // take off one point if failed to walk
             this.addPoint(-1);
         }
+        // clip the tail (from 0) if it is longer than it should be
+        while (this.tail.length > this.score) {
+            this.tail.shift();
+        }
+        console.log(this.tail);
     }
     handleMessage(message) {
         console.log(message);
@@ -143,7 +144,8 @@ export class ClientPlayer {
         }
     }
     handlePlayerInfoMessage(data) {
-        if (data.score) {
+        // must do this since 0 is a valid score but tests falsey
+        if (data.score !== undefined) {
             this.setScore(data.score);
         }
         if (data.colour) {
@@ -165,8 +167,11 @@ export class ClientPlayer {
         });
     }
     setScore(score) {
+        console.log(score);
         this.score = score;
+        console.log(this.scoreEl.innerText);
         this.scoreEl.innerText = String(this.score);
+        console.log(this.scoreEl.innerText);
     }
     addInteractionEvents(elements) {
         let dirArr = ["up", "left", "down", "right"];
