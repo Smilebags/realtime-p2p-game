@@ -22,7 +22,7 @@ export class HostPlayer {
         });
     }
     tailColour() {
-        let colour = new Colour().fromHex(this.colour);
+        let colour = Colour.fromHex(this.colour);
         if (colour.luminosity >= 128) {
             colour.luminosity = colour.luminosity *= 1.1;
         }
@@ -145,7 +145,7 @@ export class ClientPlayer {
         });
     }
     textColour() {
-        let playerColour = new Colour().fromHex(this.colour);
+        let playerColour = Colour.fromHex(this.colour);
         if (playerColour.luminosity >= 128) {
             return "#000000";
         }

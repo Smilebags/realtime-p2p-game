@@ -86,12 +86,12 @@ export class Colour {
         this.b = b;
     }
 
-    fromHex(hexString: string): Colour {
+    static fromHex(hexString: string): Colour {
         console.log(hexString);
         hexString = hexString.substr(1);
-        let r: number = this.hexToNumber(hexString.substr(0, 2));
-        let g: number = this.hexToNumber(hexString.substr(2, 2));
-        let b: number = this.hexToNumber(hexString.substr(4, 2));
+        let r: number = hexToNumber(hexString.substr(0, 2));
+        let g: number = hexToNumber(hexString.substr(2, 2));
+        let b: number = hexToNumber(hexString.substr(4, 2));
         console.log(r, g, b);
         console.log(new Colour(r, g, b).hex());
         return new Colour(r, g, b);
@@ -102,7 +102,7 @@ export class Colour {
     }
 
     hex(): string {
-        return `#${this.numberToHex(this.r)}${this.numberToHex(this.g)}${this.numberToHex(this.b)}`;
+        return `#${numberToHex(this.r)}${numberToHex(this.g)}${numberToHex(this.b)}`;
     }
 
     get luminosity(): number {
@@ -120,11 +120,12 @@ export class Colour {
     toString(): string {
         return this.hex();
     }
-    private numberToHex(num: number): string {
-        let val: number = Math.floor(Math.min(num, 255));
-        return val.toString(16);
-    }
-    private hexToNumber(hex: string): number {
-        return parseInt(hex, 16);
-    }
+}
+
+function numberToHex(num: number): string {
+    let val: number = Math.floor(Math.min(num, 255));
+    return val.toString(16);
+}
+function hexToNumber(hex: string): number {
+    return parseInt(hex, 16);
 }

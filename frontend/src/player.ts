@@ -60,7 +60,7 @@ export class HostPlayer {
     }
 
     tailColour(): string {
-        let colour: Colour = new Colour().fromHex(this.colour);
+        let colour: Colour = Colour.fromHex(this.colour);
         if(colour.luminosity >= 128) {
             colour.luminosity = colour.luminosity *= 1.1;
         } else {
@@ -211,7 +211,7 @@ export class ClientPlayer {
     }
 
     textColour(): string {
-        let playerColour: Colour = new Colour().fromHex(this.colour);
+        let playerColour: Colour = Colour.fromHex(this.colour);
         if(playerColour.luminosity >= 128) {
             return "#000000";
         } else {
