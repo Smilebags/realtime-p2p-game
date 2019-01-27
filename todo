@@ -1,16 +1,17 @@
 Create diagram of system
 Finish off user interaction in error cases
 Remove disconnected users from game
-Fix second player not moving bug
 Handle disconnection and reconnection
+Design responsive and game-like UI
+Implement designed UI
+Make it work when hosted (make SSL dependency load)
+Colour player tails
+Add minimap on clients screens
 
 # Future
 Add game options before start - world size and resolution, and game speed (food rate too?)
 Add rocking-chair error to display in jurassic browsers such as IE (or just ones which don't support modules natively)
-Add minimap on clients screens
 Add leave button to client
-Colour player tails
-Make a bearable UI
-Get the PeerJS server working so I can use nicer session names more reliably
 Make PeerJS a proper import in TS rather than patching types and assuming runtime presence
 Implement a faster search structure than O(n^2) such as finding locations which have something present
+Make sure two food isn't added at the same location
