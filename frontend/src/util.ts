@@ -74,3 +74,57 @@ export function generateID(length: number = 4): string {
     }
     return str.substr(0, length).toUpperCase();
 }
+
+
+export class Colour {
+    r: number;
+    g: number;
+    b: number;
+    constructor(r: number = 0, g: number = 0, b: number = 0) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
+
+    fromHex(hexString: string): Colour {
+        console.log(hexString);
+        hexString = hexString.substr(1);
+        let r: number = this.hexToNumber(hexString.substr(0, 2));
+        let g: number = this.hexToNumber(hexString.substr(2, 2));
+        let b: number = this.hexToNumber(hexString.substr(4, 2));
+        console.log(r, g, b);
+        console.log(new Colour(r, g, b).hex());
+        return new Colour(r, g, b);
+    }
+
+    copy(): Colour {
+        return new Colour(this.r, this.g, this.b);
+    }
+
+    hex(): string {
+        return `#${this.numberToHex(this.r)}${this.numberToHex(this.g)}${this.numberToHex(this.b)}`;
+    }
+
+    get luminosity(): number {
+        return (this.r + this.g + this.b) / 3;
+    }
+
+    set luminosity(targetLuminosity: number) {
+        let currentLuminosity: number = this.luminosity;
+        let luminosityRatio: number = currentLuminosity / targetLuminosity;
+        this.r *= luminosityRatio;
+        this.g *= luminosityRatio;
+        this.b *= luminosityRatio;
+    }
+
+    toString(): string {
+        return this.hex();
+    }
+    private numberToHex(num: number): string {
+        let val: number = Math.floor(Math.min(num, 255));
+        return val.toString(16);
+    }
+    private hexToNumber(hex: string): number {
+        return parseInt(hex, 16);
+    }
+}

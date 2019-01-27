@@ -1,5 +1,5 @@
 import addShortcut from "./shortcut.js";
-import { boundedBy, clamp } from "./util.js";
+import { boundedBy, clamp, Colour } from "./util.js";
 export class HostPlayer {
     constructor(options = {}) {
         this.x = 0;
@@ -21,12 +21,23 @@ export class HostPlayer {
             }
         });
     }
+    tailColour() {
+        let colour = new Colour().fromHex(this.colour);
+        if (colour.luminosity >= 128) {
+            colour.luminosity = colour.luminosity *= 1.1;
+        }
+        else {
+            colour.luminosity = colour.luminosity /= 1.1;
+        }
+        return colour.hex();
+    }
     render() {
         if (this.ctx) {
             // draw the tail
             if (this.score > 0) {
                 this.ctx.beginPath();
-                this.ctx.fillStyle = "#333333";
+                this.ctx.fillStyle = this.tailColour();
+                console.log(this.tailColour());
                 this.tail.forEach((tailItem) => {
                     if (this.ctx) {
                         this.ctx.rect(tailItem.x, tailItem.y, 1, 1);

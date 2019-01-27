@@ -69,3 +69,46 @@ export function generateID(length = 4) {
     }
     return str.substr(0, length).toUpperCase();
 }
+export class Colour {
+    constructor(r = 0, g = 0, b = 0) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
+    fromHex(hexString) {
+        console.log(hexString);
+        hexString = hexString.substr(1);
+        let r = this.hexToNumber(hexString.substr(0, 2));
+        let g = this.hexToNumber(hexString.substr(2, 2));
+        let b = this.hexToNumber(hexString.substr(4, 2));
+        console.log(r, g, b);
+        console.log(new Colour(r, g, b).hex());
+        return new Colour(r, g, b);
+    }
+    copy() {
+        return new Colour(this.r, this.g, this.b);
+    }
+    hex() {
+        return `#${this.numberToHex(this.r)}${this.numberToHex(this.g)}${this.numberToHex(this.b)}`;
+    }
+    get luminosity() {
+        return (this.r + this.g + this.b) / 3;
+    }
+    set luminosity(targetLuminosity) {
+        let currentLuminosity = this.luminosity;
+        let luminosityRatio = currentLuminosity / targetLuminosity;
+        this.r *= luminosityRatio;
+        this.g *= luminosityRatio;
+        this.b *= luminosityRatio;
+    }
+    toString() {
+        return this.hex();
+    }
+    numberToHex(num) {
+        let val = Math.floor(Math.min(num, 255));
+        return val.toString(16);
+    }
+    hexToNumber(hex) {
+        return parseInt(hex, 16);
+    }
+}

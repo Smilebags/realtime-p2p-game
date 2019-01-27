@@ -5,7 +5,6 @@ Handle disconnection and reconnection
 Design responsive and game-like UI
 Implement designed UI
 Make it work when hosted (make SSL dependency load)
-Colour player tails
 Add minimap on clients screens
 
 # Future
