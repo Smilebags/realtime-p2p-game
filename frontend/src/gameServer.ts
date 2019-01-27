@@ -31,7 +31,7 @@ export class GameServer {
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
         this.gametickSpeed = 300;
         this.tickCount = 0;
-        this.connection = new Peer(this.id);
+        this.connection = new Peer(this.id, {secure: location.protocol === "https"});
         this.initialised = false;
         this.initialisedCallbacks = [];
 

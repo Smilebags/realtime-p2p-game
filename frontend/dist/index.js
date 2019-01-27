@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(this, void 0, void
 function joinGame(id, name) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            let peer = new Peer(generateId(16));
+            let peer = new Peer(generateId(16), { secure: location.protocol === "https" });
             let conn = peer.connect(id);
             let upEl = document.querySelector(".up");
             let leftEl = document.querySelector(".left");
