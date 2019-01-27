@@ -1,10 +1,6 @@
-Create diagram of system
-Finish off user interaction in error cases
-Remove disconnected users from game
-Handle disconnection and reconnection
 Design responsive and game-like UI
 Implement designed UI
-Make it work when hosted (make SSL dependency load)
+Make it work when hosted on github pages (make SSL dependency load)
 Add minimap on clients screens
 
 # Future
