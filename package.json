@@ -21,6 +21,7 @@
   "devDependencies": {
     "@types/express": "^4.16.0",
     "@types/peerjs": "0.0.30",
+    "@types/webrtc": "0.0.23",
     "sass": "^1.16.0"
   }
 }
