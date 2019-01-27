@@ -14,7 +14,7 @@ export class Food {
     render() {
         if (this.ctx) {
             this.ctx.beginPath();
-            this.ctx.fillStyle = "#331100";
+            this.ctx.fillStyle = "#AAAAAA";
             this.ctx.rect(this.x, this.y, 1, 1);
             this.ctx.fill();
             this.ctx.closePath();
