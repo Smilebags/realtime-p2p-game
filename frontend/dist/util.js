@@ -76,13 +76,10 @@ export class Colour {
         this.b = b;
     }
     static fromHex(hexString) {
-        console.log(hexString);
         hexString = hexString.substr(1);
         let r = hexToNumber(hexString.substr(0, 2));
         let g = hexToNumber(hexString.substr(2, 2));
         let b = hexToNumber(hexString.substr(4, 2));
-        console.log(r, g, b);
-        console.log(new Colour(r, g, b).hex());
         return new Colour(r, g, b);
     }
     copy() {

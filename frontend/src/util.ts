@@ -87,13 +87,10 @@ export class Colour {
     }
 
     static fromHex(hexString: string): Colour {
-        console.log(hexString);
         hexString = hexString.substr(1);
         let r: number = hexToNumber(hexString.substr(0, 2));
         let g: number = hexToNumber(hexString.substr(2, 2));
         let b: number = hexToNumber(hexString.substr(4, 2));
-        console.log(r, g, b);
-        console.log(new Colour(r, g, b).hex());
         return new Colour(r, g, b);
     }
 

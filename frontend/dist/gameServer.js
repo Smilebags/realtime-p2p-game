@@ -223,6 +223,5 @@ function makePlayerColour(str) {
         strSum = strSum % 10000;
     });
     let brightness = (Math.random() * 50) + 25;
-    console.log(hslToHex(strSum % 360, 50, brightness));
     return hslToHex(strSum % 360, 50, brightness);
 }

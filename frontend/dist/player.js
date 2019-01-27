@@ -49,7 +49,6 @@ export class HostPlayer {
             if (this.score > 0) {
                 this.ctx.beginPath();
                 this.ctx.fillStyle = this.tailColour();
-                console.log(this.tailColour());
                 this.tail.forEach((tailItem) => {
                     if (this.ctx) {
                         this.ctx.rect(tailItem.x, tailItem.y, 1, 1);
@@ -67,7 +66,6 @@ export class HostPlayer {
         }
     }
     update() {
-        console.log(this.score);
         this.connection.send({
             type: "playerInfo",
             data: {
@@ -138,7 +136,6 @@ export class HostPlayer {
         while (this.tail.length > this.score) {
             this.tail.shift();
         }
-        console.log(this.tail);
     }
     handleMessage(message) {
         switch (message.type) {
@@ -238,11 +235,8 @@ export class ClientPlayer {
         });
     }
     setScore(score) {
-        console.log(score);
         this.score = score;
-        console.log(this.scoreEl.innerText);
         this.scoreEl.innerText = String(this.score);
-        console.log(this.scoreEl.innerText);
     }
     addInteractionEvents(elements) {
         let dirArr = ["up", "left", "down", "right"];

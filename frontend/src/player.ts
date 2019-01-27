@@ -95,7 +95,6 @@ export class HostPlayer {
             if(this.score > 0) {
                 this.ctx.beginPath();
                 this.ctx.fillStyle = this.tailColour();
-                console.log(this.tailColour());
                 this.tail.forEach((tailItem) => {
                         if(this.ctx) {
                             this.ctx.rect(tailItem.x, tailItem.y, 1, 1);
@@ -114,7 +113,6 @@ export class HostPlayer {
         }
     }
     update(): void {
-        console.log(this.score);
         this.connection.send({
             type: "playerInfo",
             data: {
@@ -193,7 +191,6 @@ export class HostPlayer {
         while(this.tail.length > this.score) {
             this.tail.shift();
         }
-        console.log(this.tail);
     }
 
     handleMessage(message: IPeerMessage): void {
@@ -320,11 +317,8 @@ export class ClientPlayer {
     }
 
     setScore(score: number): void {
-        console.log(score);
         this.score = score;
-        console.log(this.scoreEl.innerText);
         this.scoreEl.innerText = String(this.score);
-        console.log(this.scoreEl.innerText);
     }
 
     addInteractionEvents(elements: HTMLElement[]): void {
