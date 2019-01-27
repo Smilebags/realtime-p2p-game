@@ -1,7 +1,7 @@
-import { IPeerMessage } from "./types";
+import { IPeerMessage, ErrorWithType } from "./types";
 import { HostPlayer } from "./player.js";
 import { Food } from "./entities.js";
-import { hslToHex } from "./util.js";
+import { hslToHex, generateId } from "./util.js";
 
 export class GameServer {
     id: string;
@@ -14,9 +14,12 @@ export class GameServer {
     worldSize: number;
     gametickSpeed: number;
     tickCount: number;
-    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, id: string, scoreboardEl: HTMLOListElement) {
+    connection: PeerJs.Peer;
+    initialised: boolean;
+    initialisedCallbacks: any[];
+    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, scoreboardEl: HTMLOListElement) {
         this.paused = true;
-        this.id = id;
+        this.id = generateId();
         this.playerList = [];
         this.entityList = [];
         this.canvas = canvas;
@@ -28,11 +31,67 @@ export class GameServer {
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
         this.gametickSpeed = 300;
         this.tickCount = 0;
+        this.connection = new Peer(this.id);
+        this.initialised = false;
+        this.initialisedCallbacks = [];
+
+        this.setupConnection(this.connection);
+
         this.gametick();
         setInterval(() => {
             this.gametick();
         }, this.gametickSpeed);
         this.render();
+    }
+
+    async ready(): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            if(this.initialised === true) {
+                resolve();
+            } else {
+                this.initialisedCallbacks.push(() => {
+                    resolve();
+                });
+            }
+        });
+    }
+
+    initialisationCompleted(): void {
+        this.initialisedCallbacks.forEach((callback) => {
+            callback();
+        });
+    }
+
+    setupConnection(connection: PeerJs.Peer): void {
+        connection.on("open", (id: string) => {
+            console.log("ID: " + id);
+            this.initialisationCompleted();
+        });
+
+        connection.on("error", (err:ErrorWithType) => {
+            if (err.type === "unavailable-id") {
+                console.log(err);
+            } else {
+                alert(err);
+            }
+        });
+
+        connection.on("disconnected", () => {
+            // this connection has lost connectivity to the peer server
+            alert("Connection has been lost.");
+            connection.reconnect();
+        });
+
+        connection.on("connection", (clientConnection: PeerJs.DataConnection) => {
+            let hasRegistered: boolean = false;
+            // another peer has connected to this
+            clientConnection.on("data", (message: IPeerMessage) => {
+                if(!hasRegistered && message.type === "registerPlayer") {
+                    this.addPlayer(message.data.name, clientConnection);
+                    hasRegistered = true;
+                }
+            });
+        });
     }
 
     addPlayer(name: string, connection: PeerJs.DataConnection): HostPlayer {
@@ -44,12 +103,23 @@ export class GameServer {
             colour: makePlayerColour(name),
             connection
         });
+
+        newPlayer.on("disconnect", () => {
+            this.removePlayer(newPlayer);
+        });
+
+        // set up ping to handle disconnections
+
         if(!this.playerList.length && this.paused) {
             this.paused = false;
         }
         this.playerList.push(newPlayer);
         this.updateScoreboard();
         return newPlayer;
+    }
+
+    removePlayer(player: HostPlayer): void {
+        this.playerList.splice(this.playerList.indexOf(player), 1);
     }
 
     findPlayerByName(name: string): HostPlayer | null {
@@ -100,22 +170,6 @@ export class GameServer {
         requestAnimationFrame(() => {
             this.render();
         });
-    }
-
-    handleMessage(message: IPeerMessage, connection: PeerJs.DataConnection): void {
-        switch (message.type) {
-            case "registerPlayer":
-                this.addPlayer(message.data.name, connection);
-                break;
-            case "playerData":
-                let player: HostPlayer | null = this.findPlayerByName(message.data.name);
-                if (player) {
-                    player.facing = message.data.facing;
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     gametick(): void {

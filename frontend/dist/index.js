@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { GameServer } from "./gameServer.js";
 import { ClientPlayer } from "./player.js";
-import { generateID } from "./util.js";
+import { generateId } from "./util.js";
 const worldSize = 30;
 document.addEventListener("DOMContentLoaded", () => __awaiter(this, void 0, void 0, function* () {
     // join game quickly if the game query is present
@@ -40,16 +40,16 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(this, void 0, void
 function joinGame(id, name) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            let peer = new Peer(generateID(16));
+            let peer = new Peer(generateId(16));
             let conn = peer.connect(id);
+            let upEl = document.querySelector(".up");
+            let leftEl = document.querySelector(".left");
+            let downEl = document.querySelector(".down");
+            let rightEl = document.querySelector(".right");
+            let nameEl = document.querySelector(".name");
+            let scoreEl = document.querySelector(".score");
+            let colourEl = document.querySelector(".colour");
             conn.on("open", () => __awaiter(this, void 0, void 0, function* () {
-                let upEl = document.querySelector(".up");
-                let leftEl = document.querySelector(".left");
-                let downEl = document.querySelector(".down");
-                let rightEl = document.querySelector(".right");
-                let nameEl = document.querySelector(".name");
-                let scoreEl = document.querySelector(".score");
-                let colourEl = document.querySelector(".colour");
                 if (upEl && leftEl && downEl && rightEl && nameEl && scoreEl && colourEl) {
                     let player = new ClientPlayer({
                         name: name,
@@ -66,6 +66,9 @@ function joinGame(id, name) {
                     reject();
                 }
             }));
+            conn.on("error", (err) => {
+                reject(err);
+            });
         });
     });
 }
@@ -112,41 +115,13 @@ function makeGameServer() {
     return __awaiter(this, void 0, void 0, function* () {
         // set up server Peer and display ID
         setPage("host");
-        const peer = new Peer(generateID());
         const canvas = document.querySelector("canvas");
         const scoreboardEl = document.querySelector(".scoreboard");
         const serverIdEl = document.querySelector(".serverId");
         // await the creation and connection of the server
         // so that the function doesn't return until the server is ready
-        const server = yield new Promise((resolve, reject) => {
-            const server = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
-            peer.on("open", function (id) {
-                resolve(server);
-                console.log("ID: " + id);
-            });
-            peer.on("error", function (err) {
-                if (err.type === "unavailable-id") {
-                    reject(err);
-                }
-                else {
-                    alert(err);
-                    reject(err);
-                }
-            });
-            peer.on("disconnected", () => {
-                alert("Connection has been lost.");
-                peer.reconnect();
-            });
-            peer.on("connection", (conn) => {
-                conn.on("data", (data) => {
-                    server.handleMessage(data, conn);
-                });
-                let i = 0;
-                setInterval(() => {
-                    conn.send({ type: "ping", data: i++ });
-                }, 1000);
-            });
-        });
+        const server = new GameServer(canvas, worldSize, 1000, scoreboardEl);
+        yield server.ready();
         if (serverIdEl) {
             serverIdEl.innerHTML = `Game ID: ${server.id}`;
         }

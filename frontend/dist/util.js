@@ -62,7 +62,7 @@ export function hslToHex(h, s, l) {
     };
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
-export function generateID(length = 4) {
+export function generateId(length = 4) {
     let str = "";
     for (let i = 0; i < length; i++) {
         str += Math.random().toString(36).substr(2);

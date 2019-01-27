@@ -5,7 +5,7 @@ import {
 
 import { GameServer } from "./gameServer.js";
 import { ClientPlayer } from "./player.js";
-import { generateID } from "./util.js";
+import { generateId } from "./util.js";
 import { constants } from "http2";
 
 const worldSize: number = 30;
@@ -40,22 +40,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function joinGame(id: string, name: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let peer: PeerJs.Peer = new Peer(generateID(16));
+    return new Promise<void>((resolve, reject) => {
+        let peer: PeerJs.Peer = new Peer(generateId(16));
 
         let conn: PeerJs.DataConnection = peer.connect(id);
 
+        let upEl: HTMLDivElement | null = document.querySelector(".up");
+        let leftEl: HTMLDivElement | null = document.querySelector(".left");
+        let downEl: HTMLDivElement | null = document.querySelector(".down");
+        let rightEl: HTMLDivElement | null = document.querySelector(".right");
+
+        let nameEl: HTMLDivElement | null = document.querySelector(".name");
+        let scoreEl: HTMLDivElement | null = document.querySelector(".score");
+        let colourEl: HTMLDivElement | null = document.querySelector(".colour");
 
         conn.on("open", async () => {
 
-            let upEl: HTMLDivElement | null = document.querySelector(".up");
-            let leftEl: HTMLDivElement | null = document.querySelector(".left");
-            let downEl: HTMLDivElement | null = document.querySelector(".down");
-            let rightEl: HTMLDivElement | null = document.querySelector(".right");
-
-            let nameEl: HTMLDivElement | null = document.querySelector(".name");
-            let scoreEl: HTMLDivElement | null = document.querySelector(".score");
-            let colourEl: HTMLDivElement | null = document.querySelector(".colour");
             if(upEl && leftEl && downEl && rightEl && nameEl && scoreEl && colourEl) {
                 let player: ClientPlayer = new ClientPlayer({
                     name: name,
@@ -70,6 +70,9 @@ async function joinGame(id: string, name: string): Promise<void> {
                 // couldn't find button elements
                 reject();
             }
+        });
+        conn.on("error", (err) => {
+            reject(err);
         });
     });
 }
@@ -113,45 +116,14 @@ async function makeGameServer(): Promise<void> {
     // set up server Peer and display ID
     setPage("host");
 
-    const peer: PeerJs.Peer = new Peer(generateID());
     const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector("canvas");
     const scoreboardEl: HTMLOListElement = <HTMLOListElement>document.querySelector(".scoreboard");
     const serverIdEl: HTMLElement = <HTMLElement>document.querySelector(".serverId");
 
     // await the creation and connection of the server
     // so that the function doesn't return until the server is ready
-    const server: GameServer = await new Promise((resolve, reject) => {
-        const server: GameServer = new GameServer(canvas, worldSize, 1000, peer.id, scoreboardEl);
-
-        peer.on("open", function (id: string): void {
-            resolve(server);
-            console.log("ID: " + id);
-        });
-
-        peer.on("error", function (err:ErrorWithType): void {
-            if (err.type === "unavailable-id") {
-                reject(err);
-            } else {
-                alert(err);
-                reject(err);
-            }
-        });
-
-        peer.on("disconnected", () => {
-            alert("Connection has been lost.");
-            peer.reconnect();
-        });
-
-        peer.on("connection", (conn: PeerJs.DataConnection) => {
-            conn.on("data", (data: IPeerMessage) => {
-                server.handleMessage(data, conn);
-            });
-            let i: number = 0;
-            setInterval(() => {
-                conn.send({type:"ping", data:i++});
-            }, 1000);
-        });
-    });
+    const server: GameServer = new GameServer(canvas, worldSize, 1000, scoreboardEl);
+    await server.ready();
     if(serverIdEl) {
         serverIdEl.innerHTML = `Game ID: ${server.id}`;
     }

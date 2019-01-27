@@ -17,6 +17,10 @@ interface IClientPlayerConstructorOptions {
     colourEl: HTMLElement;
 }
 
+interface ICallbackItem {
+    name: string;
+    fn: any;
+}
 
 interface IHostPlayerConstructorOptions {
     name: string;
@@ -38,6 +42,10 @@ export class HostPlayer {
     score: number;
     facing: Direction;
     colour: string;
+    pingTimeoutHandle: number;
+    eventCallbacks: ICallbackItem[];
+    pingInterval: number = 1000;
+    pingTimeout: number = this.pingInterval * 3;
     constructor(options: IHostPlayerConstructorOptions = <IHostPlayerConstructorOptions>{}) {
         this.x = 0;
         this.y = 0;
@@ -57,6 +65,18 @@ export class HostPlayer {
                 colour: this.colour,
             }
         });
+
+        this.eventCallbacks = [];
+
+        this.connection.on("data", (message: IPeerMessage) => {
+            this.handleMessage(message);
+        });
+        setInterval(() => {
+            this.connection.send({type:"ping", data: null});
+        }, this.pingInterval);
+        this.pingTimeoutHandle = window.setTimeout(() => {
+            this.emit("disconnect");
+        }, this.pingTimeout);
     }
 
     tailColour(): string {
@@ -100,6 +120,23 @@ export class HostPlayer {
             data: {
                 score: this.score
             }
+        });
+    }
+
+    emit(eventName: string, data?: any): void {
+        let matchedCallbacks: ICallbackItem[] = this.eventCallbacks.filter((callback: ICallbackItem) => {
+            return callback.name === eventName;
+        });
+
+        matchedCallbacks.forEach((callback) => {
+            callback.fn(data);
+        });
+    }
+
+    on(eventName: string, fn: any): void {
+        this.eventCallbacks.push({
+            name: eventName,
+            fn: fn
         });
     }
 
@@ -160,8 +197,21 @@ export class HostPlayer {
     }
 
     handleMessage(message: IPeerMessage): void {
-        console.log(message);
+        switch (message.type) {
+            case "playerData":
+                    this.facing = message.data.facing;
+                break;
+            case "pong":
+                window.clearTimeout(this.pingTimeoutHandle);
+                this.pingTimeoutHandle = window.setTimeout(() => {
+                    this.emit("disconnect");
+                }, this.pingTimeout);
+                break;
+            default:
+                break;
+        }
     }
+
 }
 
 export class ClientPlayer {
@@ -174,6 +224,7 @@ export class ClientPlayer {
     private score: number;
     colour: string;
     textColourSet: boolean;
+    lastPingTime: number;
     constructor(options: IClientPlayerConstructorOptions = <IClientPlayerConstructorOptions>{}) {
         let {
             name,
@@ -199,6 +250,7 @@ export class ClientPlayer {
         this.setScore(0);
         this.textColourSet = false;
 
+        this.lastPingTime = Date.now();
         connection.on("data", (data: IPeerMessage) => {
             this.handleMessage(data);
         });
@@ -224,6 +276,12 @@ export class ClientPlayer {
             case "playerInfo":
                 // set score, name and colour
                 this.handlePlayerInfoMessage(message.data);
+                break;
+            case "ping":
+                // set score, name and colour
+                let newPingTime: number = Date.now();
+                this.connection.send(<IPeerMessage>{type: "pong", data: newPingTime - this.lastPingTime});
+                this.lastPingTime = newPingTime;
                 break;
             default:
                 console.log(message);

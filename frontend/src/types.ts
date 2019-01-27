@@ -3,7 +3,8 @@ import { HostPlayer } from "./player.js";
 /// <reference types="peerjs" />
 
 // gives proper types for the data given the type property value
-export type IPeerMessage =  {type: "ping", data: Ping} |
+export type IPeerMessage =  {type: "ping", data: null} |
+                            {type: "pong", data: number} |
                             {type: "playerData", data: IPlayerData} |
                             {type: "registerPlayer", data: IRegisterPlayer} |
                             {type: "playerInfo", data: IPlayerInfo};

@@ -67,7 +67,7 @@ export function hslToHex(h: number, s: number, l: number): string {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-export function generateID(length: number = 4): string {
+export function generateId(length: number = 4): string {
     let str: string = "";
     for ( let i: number = 0; i < length; i++ ) {
         str += Math.random().toString(36).substr(2);

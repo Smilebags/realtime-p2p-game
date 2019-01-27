@@ -2,6 +2,8 @@ import addShortcut from "./shortcut.js";
 import { boundedBy, clamp, Colour } from "./util.js";
 export class HostPlayer {
     constructor(options = {}) {
+        this.pingInterval = 1000;
+        this.pingTimeout = this.pingInterval * 3;
         this.x = 0;
         this.y = 0;
         this.name = options.name;
@@ -20,6 +22,16 @@ export class HostPlayer {
                 colour: this.colour,
             }
         });
+        this.eventCallbacks = [];
+        this.connection.on("data", (message) => {
+            this.handleMessage(message);
+        });
+        setInterval(() => {
+            this.connection.send({ type: "ping", data: null });
+        }, this.pingInterval);
+        this.pingTimeoutHandle = window.setTimeout(() => {
+            this.emit("disconnect");
+        }, this.pingTimeout);
     }
     tailColour() {
         let colour = Colour.fromHex(this.colour);
@@ -61,6 +73,20 @@ export class HostPlayer {
             data: {
                 score: this.score
             }
+        });
+    }
+    emit(eventName, data) {
+        let matchedCallbacks = this.eventCallbacks.filter((callback) => {
+            return callback.name === eventName;
+        });
+        matchedCallbacks.forEach((callback) => {
+            callback.fn(data);
+        });
+    }
+    on(eventName, fn) {
+        this.eventCallbacks.push({
+            name: eventName,
+            fn: fn
         });
     }
     walk() {
@@ -115,7 +141,19 @@ export class HostPlayer {
         console.log(this.tail);
     }
     handleMessage(message) {
-        console.log(message);
+        switch (message.type) {
+            case "playerData":
+                this.facing = message.data.facing;
+                break;
+            case "pong":
+                window.clearTimeout(this.pingTimeoutHandle);
+                this.pingTimeoutHandle = window.setTimeout(() => {
+                    this.emit("disconnect");
+                }, this.pingTimeout);
+                break;
+            default:
+                break;
+        }
     }
 }
 export class ClientPlayer {
@@ -134,6 +172,7 @@ export class ClientPlayer {
         this.colourEl.style.backgroundColor = this.colour;
         this.setScore(0);
         this.textColourSet = false;
+        this.lastPingTime = Date.now();
         connection.on("data", (data) => {
             this.handleMessage(data);
         });
@@ -158,6 +197,12 @@ export class ClientPlayer {
             case "playerInfo":
                 // set score, name and colour
                 this.handlePlayerInfoMessage(message.data);
+                break;
+            case "ping":
+                // set score, name and colour
+                let newPingTime = Date.now();
+                this.connection.send({ type: "pong", data: newPingTime - this.lastPingTime });
+                this.lastPingTime = newPingTime;
                 break;
             default:
                 console.log(message);

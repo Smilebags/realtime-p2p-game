@@ -1,10 +1,18 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { HostPlayer } from "./player.js";
 import { Food } from "./entities.js";
-import { hslToHex } from "./util.js";
+import { hslToHex, generateId } from "./util.js";
 export class GameServer {
-    constructor(canvas, worldSize, canvasSize, id, scoreboardEl) {
+    constructor(canvas, worldSize, canvasSize, scoreboardEl) {
         this.paused = true;
-        this.id = id;
+        this.id = generateId();
         this.playerList = [];
         this.entityList = [];
         this.canvas = canvas;
@@ -16,11 +24,63 @@ export class GameServer {
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
         this.gametickSpeed = 300;
         this.tickCount = 0;
+        this.connection = new Peer(this.id);
+        this.initialised = false;
+        this.initialisedCallbacks = [];
+        this.setupConnection(this.connection);
         this.gametick();
         setInterval(() => {
             this.gametick();
         }, this.gametickSpeed);
         this.render();
+    }
+    ready() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                if (this.initialised === true) {
+                    resolve();
+                }
+                else {
+                    this.initialisedCallbacks.push(() => {
+                        resolve();
+                    });
+                }
+            });
+        });
+    }
+    initialisationCompleted() {
+        this.initialisedCallbacks.forEach((callback) => {
+            callback();
+        });
+    }
+    setupConnection(connection) {
+        connection.on("open", (id) => {
+            console.log("ID: " + id);
+            this.initialisationCompleted();
+        });
+        connection.on("error", (err) => {
+            if (err.type === "unavailable-id") {
+                console.log(err);
+            }
+            else {
+                alert(err);
+            }
+        });
+        connection.on("disconnected", () => {
+            // this connection has lost connectivity to the peer server
+            alert("Connection has been lost.");
+            connection.reconnect();
+        });
+        connection.on("connection", (clientConnection) => {
+            let hasRegistered = false;
+            // another peer has connected to this
+            clientConnection.on("data", (message) => {
+                if (!hasRegistered && message.type === "registerPlayer") {
+                    this.addPlayer(message.data.name, clientConnection);
+                    hasRegistered = true;
+                }
+            });
+        });
     }
     addPlayer(name, connection) {
         let newPlayer = new HostPlayer({
@@ -31,12 +91,19 @@ export class GameServer {
             colour: makePlayerColour(name),
             connection
         });
+        newPlayer.on("disconnect", () => {
+            this.removePlayer(newPlayer);
+        });
+        // set up ping to handle disconnections
         if (!this.playerList.length && this.paused) {
             this.paused = false;
         }
         this.playerList.push(newPlayer);
         this.updateScoreboard();
         return newPlayer;
+    }
+    removePlayer(player) {
+        this.playerList.splice(this.playerList.indexOf(player), 1);
     }
     findPlayerByName(name) {
         return this.playerList.find((player) => {
@@ -81,21 +148,6 @@ export class GameServer {
         requestAnimationFrame(() => {
             this.render();
         });
-    }
-    handleMessage(message, connection) {
-        switch (message.type) {
-            case "registerPlayer":
-                this.addPlayer(message.data.name, connection);
-                break;
-            case "playerData":
-                let player = this.findPlayerByName(message.data.name);
-                if (player) {
-                    player.facing = message.data.facing;
-                }
-                break;
-            default:
-                break;
-        }
     }
     gametick() {
         if (this.paused) {
