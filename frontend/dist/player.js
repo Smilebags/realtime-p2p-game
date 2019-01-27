@@ -133,6 +133,7 @@ export class ClientPlayer {
         this.nameEl.innerText = name;
         this.colourEl.style.backgroundColor = this.colour;
         this.setScore(0);
+        this.textColourSet = false;
         connection.on("data", (data) => {
             this.handleMessage(data);
         });
@@ -142,6 +143,15 @@ export class ClientPlayer {
                 name: this.name
             }
         });
+    }
+    textColour() {
+        let playerColour = new Colour().fromHex(this.colour);
+        if (playerColour.luminosity >= 128) {
+            return "#000000";
+        }
+        else {
+            return "#FFFFFF";
+        }
     }
     handleMessage(message) {
         switch (message.type) {
@@ -162,6 +172,11 @@ export class ClientPlayer {
         if (data.colour) {
             this.colour = data.colour;
             this.colourEl.style.backgroundColor = this.colour;
+            if (!this.textColourSet) {
+                this.nameEl.style.color = this.textColour();
+                this.scoreEl.style.color = this.textColour();
+                this.textColourSet = true;
+            }
         }
         if (data.name) {
             this.name = data.name;

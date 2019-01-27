@@ -173,6 +173,7 @@ export class ClientPlayer {
     colourEl: HTMLElement;
     private score: number;
     colour: string;
+    textColourSet: boolean;
     constructor(options: IClientPlayerConstructorOptions = <IClientPlayerConstructorOptions>{}) {
         let {
             name,
@@ -196,6 +197,7 @@ export class ClientPlayer {
         this.nameEl.innerText = name;
         this.colourEl.style.backgroundColor = this.colour;
         this.setScore(0);
+        this.textColourSet = false;
 
         connection.on("data", (data: IPeerMessage) => {
             this.handleMessage(data);
@@ -206,6 +208,15 @@ export class ClientPlayer {
                 name: this.name
             }
         });
+    }
+
+    textColour(): string {
+        let playerColour: Colour = new Colour().fromHex(this.colour);
+        if(playerColour.luminosity >= 128) {
+            return "#000000";
+        } else {
+            return "#FFFFFF";
+        }
     }
 
     handleMessage(message: IPeerMessage): void {
@@ -228,6 +239,11 @@ export class ClientPlayer {
         if(data.colour) {
             this.colour = data.colour;
             this.colourEl.style.backgroundColor = this.colour;
+            if(!this.textColourSet) {
+                this.nameEl.style.color = this.textColour();
+                this.scoreEl.style.color = this.textColour();
+                this.textColourSet = true;
+            }
         }
         if(data.name) {
             this.name = data.name;
