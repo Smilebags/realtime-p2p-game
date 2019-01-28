@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function joinGame(id: string, name: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        let peer: PeerJs.Peer = new Peer(generateId(16), {secure: location.protocol === "https:"});
+        let peer: PeerJs.Peer = new Peer(generateId(16), {secure: location.protocol === "https:", port: 443});
 
         let conn: PeerJs.DataConnection = peer.connect(id);
 
