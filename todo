@@ -1,12 +1,11 @@
 Design responsive and game-like UI
 Implement designed UI
-Make it work when hosted on github pages (make SSL dependency load)
 Add minimap on clients screens
 Make sure two food isn't added at the same location
+Add game options before start - world size and resolution, and game speed (food rate too?)
+Add leave button to client
 
 # Future
-Add game options before start - world size and resolution, and game speed (food rate too?)
 Add rocking-chair error to display in jurassic browsers such as IE (or just ones which don't support modules natively)
-Add leave button to client
 Make PeerJS a proper import in TS rather than patching types and assuming runtime presence
 Implement a faster search structure than O(n^2) such as finding locations which have something present
