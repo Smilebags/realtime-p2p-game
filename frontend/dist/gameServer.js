@@ -10,7 +10,7 @@ import { HostPlayer } from "./player.js";
 import { Food } from "./entities.js";
 import { hslToHex, generateId } from "./util.js";
 export class GameServer {
-    constructor(canvas, worldSize, canvasSize, scoreboardEl) {
+    constructor(canvas, scoreboardEl, { worldSize = 40, canvasSize = 1000, foodRate = 8, tickSpeed = 250, }) {
         this.paused = true;
         this.id = generateId();
         this.playerList = [];
@@ -22,9 +22,13 @@ export class GameServer {
         this.worldSize = worldSize;
         this.context = canvas.getContext("2d");
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
-        this.gametickSpeed = 300;
+        this.gametickSpeed = tickSpeed;
+        this.foodRate = foodRate;
         this.tickCount = 0;
-        this.connection = new Peer(this.id, { secure: location.protocol === "https:", port: 443 });
+        this.connection = new Peer(this.id, {
+            secure: location.protocol === "https:",
+            port: location.protocol === "https:" ? 443 : 9000
+        });
         this.initialised = false;
         this.initialisedCallbacks = [];
         this.setupConnection(this.connection);
@@ -33,6 +37,15 @@ export class GameServer {
             this.gametick();
         }, this.gametickSpeed);
         this.render();
+    }
+    setOptions(options) {
+        let { foodRate, tickSpeed, canvasSize } = options;
+        this.foodRate = foodRate !== undefined ? foodRate : this.foodRate;
+        this.gametickSpeed = tickSpeed !== undefined ? tickSpeed : this.gametickSpeed;
+        if (canvasSize !== undefined) {
+            this.canvas.width = canvasSize;
+            this.canvas.height = canvasSize;
+        }
     }
     ready() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -201,7 +214,7 @@ export class GameServer {
             });
         });
         // add more food
-        if (this.tickCount % 5 === 0) {
+        if (this.tickCount % this.foodRate === 0) {
             this.entityList.push(new Food({
                 x: Math.floor(Math.random() * (this.worldSize + 1)),
                 y: Math.floor(Math.random() * (this.worldSize + 1)),

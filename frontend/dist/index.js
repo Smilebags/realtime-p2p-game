@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { GameServer } from "./gameServer.js";
 import { ClientPlayer } from "./player.js";
 import { generateId } from "./util.js";
-const worldSize = 30;
 document.addEventListener("DOMContentLoaded", () => __awaiter(this, void 0, void 0, function* () {
     // join game quickly if the game query is present
     const urlParams = new URLSearchParams(window.location.search);
@@ -40,7 +39,10 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(this, void 0, void
 function joinGame(id, name) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            let peer = new Peer(generateId(16), { secure: location.protocol === "https:", port: 443 });
+            let peer = new Peer(generateId(16), {
+                secure: location.protocol === "https:",
+                port: location.protocol === "https:" ? 443 : 9000
+            });
             let conn = peer.connect(id);
             let upEl = document.querySelector(".up");
             let leftEl = document.querySelector(".left");
@@ -120,7 +122,11 @@ function makeGameServer() {
         const serverIdEl = document.querySelector(".serverId");
         // await the creation and connection of the server
         // so that the function doesn't return until the server is ready
-        const server = new GameServer(canvas, worldSize, 1000, scoreboardEl);
+        const server = new GameServer(canvas, scoreboardEl, {
+            foodRate: 4,
+            worldSize: 50,
+            tickSpeed: 250
+        });
         yield server.ready();
         if (serverIdEl) {
             serverIdEl.innerHTML = `Game ID: ${server.id}`;

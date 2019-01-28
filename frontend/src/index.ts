@@ -8,7 +8,6 @@ import { ClientPlayer } from "./player.js";
 import { generateId } from "./util.js";
 import { constants } from "http2";
 
-const worldSize: number = 30;
 
 document.addEventListener("DOMContentLoaded", async () => {
     // join game quickly if the game query is present
@@ -41,7 +40,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function joinGame(id: string, name: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        let peer: PeerJs.Peer = new Peer(generateId(16), {secure: location.protocol === "https:", port: 443});
+        let peer: PeerJs.Peer = new Peer(generateId(16), {
+            secure: location.protocol === "https:",
+            port: location.protocol === "https:" ? 443 : 9000
+        });
 
         let conn: PeerJs.DataConnection = peer.connect(id);
 
@@ -122,7 +124,11 @@ async function makeGameServer(): Promise<void> {
 
     // await the creation and connection of the server
     // so that the function doesn't return until the server is ready
-    const server: GameServer = new GameServer(canvas, worldSize, 1000, scoreboardEl);
+    const server: GameServer = new GameServer(canvas, scoreboardEl, {
+        foodRate: 4,
+        worldSize: 50,
+        tickSpeed: 250
+    });
     await server.ready();
     if(serverIdEl) {
         serverIdEl.innerHTML = `Game ID: ${server.id}`;

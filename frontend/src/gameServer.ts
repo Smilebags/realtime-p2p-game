@@ -3,6 +3,12 @@ import { HostPlayer } from "./player.js";
 import { Food } from "./entities.js";
 import { hslToHex, generateId } from "./util.js";
 
+interface IGameWorldOptions {
+        worldSize?: number;
+        canvasSize?: number;
+        foodRate?: number;
+        tickSpeed?: number;
+}
 export class GameServer {
     id: string;
     paused: boolean;
@@ -13,11 +19,20 @@ export class GameServer {
     context: CanvasRenderingContext2D;
     worldSize: number;
     gametickSpeed: number;
+    foodRate: number;
     tickCount: number;
     connection: PeerJs.Peer;
     initialised: boolean;
     initialisedCallbacks: any[];
-    constructor(canvas: HTMLCanvasElement, worldSize: number, canvasSize: number, scoreboardEl: HTMLOListElement) {
+    constructor(
+        canvas: HTMLCanvasElement,
+        scoreboardEl: HTMLOListElement,
+        {
+            worldSize = 40,
+            canvasSize = 1000,
+            foodRate = 8,
+            tickSpeed = 250,
+        }: IGameWorldOptions) {
         this.paused = true;
         this.id = generateId();
         this.playerList = [];
@@ -29,9 +44,13 @@ export class GameServer {
         this.worldSize = worldSize;
         this.context = <CanvasRenderingContext2D>canvas.getContext("2d");
         this.context.scale(canvasSize / worldSize, canvasSize / worldSize);
-        this.gametickSpeed = 300;
+        this.gametickSpeed = tickSpeed;
+        this.foodRate = foodRate;
         this.tickCount = 0;
-        this.connection = new Peer(this.id, {secure: location.protocol === "https:", port: 443});
+        this.connection = new Peer(this.id, {
+            secure: location.protocol === "https:",
+            port: location.protocol === "https:" ? 443 : 9000
+        });
         this.initialised = false;
         this.initialisedCallbacks = [];
 
@@ -42,6 +61,20 @@ export class GameServer {
             this.gametick();
         }, this.gametickSpeed);
         this.render();
+    }
+
+    setOptions(options: IGameWorldOptions): void {
+        let {
+            foodRate,
+            tickSpeed,
+            canvasSize
+        } = options;
+        this.foodRate = foodRate !== undefined ? foodRate : this.foodRate;
+        this.gametickSpeed = tickSpeed !== undefined ? tickSpeed : this.gametickSpeed;
+        if(canvasSize !== undefined) {
+            this.canvas.width = canvasSize;
+            this.canvas.height = canvasSize;
+        }
     }
 
     async ready(): Promise<void> {
@@ -229,7 +262,7 @@ export class GameServer {
         });
 
         // add more food
-        if(this.tickCount % 5 === 0) {
+        if(this.tickCount % this.foodRate === 0) {
             this.entityList.push(new Food({
                 x: Math.floor(Math.random() * (this.worldSize + 1)),
                 y: Math.floor(Math.random() * (this.worldSize + 1)),

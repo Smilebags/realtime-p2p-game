@@ -2,7 +2,6 @@ Design responsive and game-like UI
 Implement designed UI
 Add minimap on clients screens
 Make sure two food isn't added at the same location
-Add game options before start - world size and resolution, and game speed (food rate too?)
 Add leave button to client
 
 # Future
