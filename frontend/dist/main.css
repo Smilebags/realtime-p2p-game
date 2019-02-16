@@ -1,23 +1,51 @@
+:root {
+  --color: #000000;
+  --primary-color: rgb(50, 100, 200);
+  --highlight-color: rgb(91, 131, 211);
+  --background-color: rgba(0, 0, 0, 0);
+}
+
+@font-face {
+  src: url("/arcade-classic.ttf");
+  font-family: "Arcade Classic";
+  font-weight: 400;
+}
 html, body {
   padding: 0;
   margin: 0;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  font-family: "Arcade Classic", monospace;
+  color: var(--color);
+  background-color: var(--background-color);
+}
+* ::selection, * ::-moz-selection {
+  background: rgba(200, 100, 50, 0.8);
 }
 
 .page-select {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas: "title title" "join host";
+  padding: 2vmin;
+  gap: 2vmin;
 }
 .page-select > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.page-select h1 {
+  grid-area: title;
+  font-size: 10vmin;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,6 +57,57 @@ html, body {
   margin: 0;
   display: block;
   border: none;
+  --color: white;
+  --background-color: var(--primary-color);
+  font-size: 5vmin;
+}
+.page-select button:hover {
+  --background-color: var(--highlight-color);
+}
+.page-select button.player {
+  grid-area: join;
+}
+.page-select button.server {
+  grid-area: host;
+}
+
+.page-get-id, .page-get-name {
+  display: grid;
+  grid-template-columns: 1fr auto auto 1fr;
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-areas: ". . . ." ". label id ." ". connect connect ." ". . . .";
+  gap: 16px;
+  --background-color: var(--highlight-color);
+}
+.page-get-id *, .page-get-name * {
+  font-size: 5vmin;
+  padding: 1vmin;
+}
+.page-get-id label, .page-get-name label {
+  grid-area: label;
+  width: 8em;
+  text-align: right;
+  --color: white;
+}
+.page-get-id input, .page-get-name input {
+  grid-area: id;
+  width: 8em;
+  --background-color: white;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+}
+.page-get-id button, .page-get-name button {
+  grid-area: connect;
+  --background-color: white;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+}
+.page-get-id button:hover, .page-get-name button:hover {
+  --background-color: var(--primary-color);
+  --color: white;
+  outline: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .page-controller {
@@ -48,7 +127,7 @@ html, body {
 .page-controller .left,
 .page-controller .down,
 .page-controller .right {
-  background-color: #333;
+  --background-color: var(--primary-color);
   color: white;
   display: flex;
   justify-content: center;
@@ -56,6 +135,7 @@ html, body {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+  font-size: 25vmin;
 }
 .page-controller .up {
   grid-area: up;
@@ -75,70 +155,99 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 12vmin;
+  font-size: 10vmin;
+  overflow: hidden;
 }
 
 @media (orientation: portrait) {
   .page-controller {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 33vw 33vw;
     grid-template-areas: "info info info" ". up ." "left down right";
+  }
+  .page-controller .colour {
+    font-size: 16vmin;
   }
 }
 .page-host {
   position: relative;
   display: grid;
-  grid-template-areas: "sidebar .  game .";
-  grid-template-columns: 25vmin 1fr calc(100vmin - 2vmin) 1fr;
-  padding: 1vmin;
-  grid-gap: 1vmin;
+  grid-template-areas: "sidebar game";
+  grid-template-columns: 1fr calc(100vmin - 4vmin);
+  padding: 2vmin;
+  grid-gap: 2vmin;
   height: 100vh;
   width: 100vw;
+  --background-color: var(--primary-color);
 }
 .page-host .sidebar {
-  border: 1px solid black;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   display: grid;
-  padding: 1vmin;
-  grid-gap: 1vmin;
-  grid-template-rows: auto auto auto 1fr auto;
-  grid-template-areas: "id" "scoretitle" "scoreboard" "." "menu";
+  grid-area: sidebar;
+  padding: 2vmin;
+  grid-gap: 2vmin;
+  grid-template-rows: auto auto auto auto 1fr auto;
+  grid-template-areas: "id" "sharelink" "scoretitle" "scoreboard" "." "menu";
+  --background-color: white;
 }
 .page-host .sidebar .serverId {
   display: block;
   width: 100%;
   font-size: 2em;
   font-weight: 600;
-  text-align: center;
+  grid-area: id;
 }
 .page-host .sidebar .scoreboard {
+  grid-area: scoreboard;
   list-style: none;
   display: grid;
-  grid-template-columns: 1fr 4em;
+  grid-template-columns: auto 1fr;
+  grid-auto-rows: 1em;
   grid-gap: 8px;
 }
 .page-host .sidebar .scoreboard li {
   display: contents;
+}
+.page-host .sidebar .sharelink {
+  grid-area: sharelink;
+}
+.page-host .sidebar h2 {
+  grid-area: scoretitle;
 }
 .page-host .sidebar .menu {
   grid-area: menu;
   display: grid;
   width: 100%;
   grid-template-columns: 1fr 1fr;
+  align-self: end;
 }
 
 canvas {
   grid-area: game;
   width: 100%;
   z-index: -1;
-  border: 1px solid black;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  --background-color: white;
 }
 
 /* portrait */
 @media (max-aspect-ratio: 5/4) {
   .page-host {
+    grid-template-columns: 1fr calc(100vh - 20vw - 6vmin) 1fr;
+    grid-template-rows: 20vw auto;
+    grid-template-areas: "sidebar sidebar sidebar" ". game .";
+  }
+  .page-host .sidebar {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "id scoretitle" "sharelink scoreboard" "menu scoreboard";
+  }
+}
+@media (max-aspect-ratio: 16/19) {
+  .page-host {
     grid-template-columns: 1fr;
-    grid-template-rows: 20vmin 1fr 98vmin;
-    grid-template-areas: "scoreboard" "." "game";
+    grid-template-rows: 1fr calc(100vw - 4vmin);
+    grid-template-areas: "sidebar" "game";
   }
 }
 body > div {

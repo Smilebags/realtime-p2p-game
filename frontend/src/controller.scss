@@ -14,7 +14,7 @@
     .left,
     .down,
     .right {
-        background-color: #333;
+        --background-color: var(--primary-color);
         color: white;
         display: flex;
         justify-content: center;
@@ -22,6 +22,7 @@
         -webkit-user-select: none;
         -moz-user-select: none;
         user-select: none;
+        font-size: 25vmin;
     }
     .up {
         grid-area: up;
@@ -42,7 +43,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-size: 12vmin
+        font-size: 10vmin;
+        overflow: hidden;
     }
 }
 
@@ -50,7 +52,10 @@
 @media (orientation: portrait) {
     .page-controller {
         grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: 2fr 1fr 1fr;
+        grid-template-rows: 1fr 33vw 33vw;
         grid-template-areas: "info info info" ". up ." "left down right";
+        .colour {
+            font-size: 16vmin;
+        }
     }
 }

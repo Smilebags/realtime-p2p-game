@@ -1,40 +1,52 @@
 .page-host {
     position: relative;
     display: grid;
-    grid-template-areas: "sidebar .  game .";
-    grid-template-columns: 25vmin 1fr calc(100vmin - 2vmin) 1fr;
-    padding: 1vmin;
-    grid-gap: 1vmin;
+    grid-template-areas: "sidebar game";
+    grid-template-columns: 1fr calc(100vmin - 4vmin);
+    padding: 2vmin;
+    grid-gap: 2vmin;
     height: 100vh;
     width: 100vw;
+    --background-color: var(--primary-color);
     .sidebar {
-        border: 1px solid black;
+        border: 1px solid rgba(black, 0.2);
         display: grid;
-        padding: 1vmin;
-        grid-gap: 1vmin;
-        grid-template-rows: auto auto auto 1fr auto;
-        grid-template-areas: "id" "scoretitle" "scoreboard" "." "menu";
+        grid-area: sidebar;
+        padding: 2vmin;
+        grid-gap: 2vmin;
+        grid-template-rows: auto auto auto auto 1fr auto;
+        grid-template-areas: "id" "sharelink" "scoretitle" "scoreboard" "." "menu";
+        --background-color: white;
         .serverId {
             display: block;
             width: 100%;
             font-size: 2em;
             font-weight: 600;
-            text-align: center;
+            grid-area: id;
         }
         .scoreboard {
+            grid-area: scoreboard;
             list-style: none;
             display: grid;
-            grid-template-columns: 1fr 4em;
+            grid-template-columns: auto 1fr;
+            grid-auto-rows: 1em;
             grid-gap: 8px;
             li {
                 display: contents;
             }
+        }
+        .sharelink {
+            grid-area: sharelink;
+        }
+        h2 {
+            grid-area: scoretitle;
         }
         .menu {
             grid-area: menu;
             display: grid;
             width: 100%;
             grid-template-columns: 1fr 1fr;
+            align-self: end;
         }
     }
 }
@@ -43,15 +55,28 @@ canvas {
     grid-area: game;
     width: 100%;
     z-index: -1;
-    border: 1px solid black;
+    border: 1px solid rgba(black, 0.2);
+    --background-color: white;
 }
 
 /* portrait */
 @media(max-aspect-ratio: 5/4) {
     .page-host {
+        grid-template-columns: 1fr calc(100vh - 20vw - 6vmin) 1fr;
+        grid-template-rows: 20vw auto;
+        grid-template-areas: "sidebar sidebar sidebar" ". game .";
+        .sidebar {
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto auto 1fr;
+            grid-template-areas: "id scoretitle" "sharelink scoreboard" "menu scoreboard";
+        }
+    }
+}
+// just more than 4:5
+@media(max-aspect-ratio: 16/19) {
+    .page-host {
         grid-template-columns: 1fr;
-        grid-template-rows: 20vmin 1fr 98vmin;
-        grid-template-areas: "scoreboard" "." "game";
-
+        grid-template-rows: 1fr calc(100vw - 4vmin);
+        grid-template-areas: "sidebar" "game";
     }
 }

@@ -1,22 +1,51 @@
+:root {
+    --color: #000000;
+    --primary-color: rgb(50, 100, 200);
+    --highlight-color: rgb(91, 131, 211);
+    --background-color: rgba(0, 0, 0, 0);
+}
+
+@font-face {
+    src: url("/arcade-classic.ttf");
+    font-family: "Arcade Classic";
+    font-weight: 400;
+}
+
 html, body {
     padding: 0;
     margin: 0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    font-family: Arial, Helvetica, sans-serif;
 }
 
 *  {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    font-family: "Arcade Classic", monospace;
+    color: var(--color);
+    background-color: var(--background-color);
+    ::selection, ::-moz-selection {
+        background: rgba(200, 100, 50, 0.8);
+    }
 }
 
 .page-select {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: "title title" "join host";
+    padding: 2vmin;
+    gap: 2vmin;
     &> div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    h1 {
+        grid-area: title;
+        font-size: 10vmin;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -28,6 +57,59 @@ html, body {
         margin: 0;
         display: block;
         border: none;
+        --color: white;
+        --background-color: var(--primary-color);
+        font-size: 5vmin;
+        &:hover {
+            --background-color: var(--highlight-color);
+        }
+        &.player {
+            grid-area: join;
+        }
+        &.server {
+            grid-area: host;
+        }
+    }
+}
+
+
+.page-get-id, .page-get-name {
+    display: grid;
+    grid-template-columns: 1fr auto auto 1fr;
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas: ". . . ." ". label id ." ". connect connect ." ". . . .";
+    gap: 16px;
+    --background-color: var(--highlight-color);
+    * {
+        font-size: 5vmin;
+        padding: 1vmin;
+        
+    }
+    label {
+        grid-area: label;
+        width: 8em;
+        text-align: right;
+        --color: white;
+    }
+    input {
+        grid-area: id;
+        width: 8em;
+        --background-color: white;
+        -webkit-appearance: none;
+        appearance: none;
+        border: none;
+    }
+    button {
+        grid-area: connect;
+        --background-color: white;
+        -webkit-appearance: none;
+        appearance: none;
+        border: none;
+        &:hover {
+            --background-color: var(--primary-color);
+            --color: white;
+            outline: 1px solid rgba(white, 0.2);
+        }
     }
 }
 
