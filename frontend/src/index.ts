@@ -125,9 +125,9 @@ async function makeGameServer(): Promise<void> {
     // await the creation and connection of the server
     // so that the function doesn't return until the server is ready
     const server: GameServer = new GameServer(canvas, scoreboardEl, {
-        foodRate: 4,
-        worldSize: 50,
-        tickSpeed: 250
+        foodRate: 5,
+        worldSize: 25,
+        tickSpeed: 333
     });
     await server.ready();
     if(serverIdEl) {

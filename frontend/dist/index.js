@@ -123,9 +123,9 @@ function makeGameServer() {
         // await the creation and connection of the server
         // so that the function doesn't return until the server is ready
         const server = new GameServer(canvas, scoreboardEl, {
-            foodRate: 4,
-            worldSize: 50,
-            tickSpeed: 250
+            foodRate: 5,
+            worldSize: 25,
+            tickSpeed: 333
         });
         yield server.ready();
         if (serverIdEl) {
