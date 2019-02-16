@@ -113,6 +113,17 @@ html, body {
     }
 }
 
+
+
+@media (orientation: portrait) {
+    .page-select {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        grid-template-areas: "title" "join" "host";
+    }
+}
+
+
 @import "controller.scss";
 
 @import "host.scss";
