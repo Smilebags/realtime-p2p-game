@@ -29,6 +29,7 @@ interface IHostPlayerConstructorOptions {
     canvasContext: CanvasRenderingContext2D;
     worldSize: number;
     colour: string;
+    facing: Direction;
 }
 
 export class HostPlayer {
@@ -47,14 +48,14 @@ export class HostPlayer {
     pingInterval: number = 1000;
     pingTimeout: number = this.pingInterval * 3;
     constructor(options: IHostPlayerConstructorOptions = <IHostPlayerConstructorOptions>{}) {
-        this.x = 0;
-        this.y = 0;
+        this.x = Math.floor(options.worldSize/2) || 0;
+        this.y = Math.floor(options.worldSize/2) || 0;
         this.name = options.name;
         this.connection = options.connection;
         this.ctx = options.canvasContext;
         this.worldSize = options.worldSize;
         this.tail = [];
-        this.facing = "down";
+        this.facing = options.facing || "down";
         this.score = 0;
         this.colour = options.colour || "#000000";
         this.connection.send({

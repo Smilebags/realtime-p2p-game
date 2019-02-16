@@ -1,4 +1,4 @@
-import { IPeerMessage, ErrorWithType } from "./types";
+import { IPeerMessage, ErrorWithType, Direction } from "./types";
 import { HostPlayer } from "./player.js";
 import { Food } from "./entities.js";
 import { hslToHex, generateId } from "./util.js";
@@ -128,13 +128,25 @@ export class GameServer {
     }
 
     addPlayer(name: string, connection: PeerJs.DataConnection): HostPlayer {
+        let rand: number = Math.random();
+        let facing: Direction = "down";
+        if(rand <= 0.25) {
+            facing = "up";
+        } else if(rand <= 0.5) {
+            facing = "left";
+        } else if(rand <= 0.75) {
+            facing = "down";
+        } else {
+            facing = "right";
+        }
         let newPlayer: HostPlayer = new HostPlayer({
             name,
             location: "host",
             canvasContext: this.context,
             worldSize: this.worldSize,
             colour: makePlayerColour(name),
-            connection
+            connection,
+            facing
         });
 
         newPlayer.on("disconnect", () => {

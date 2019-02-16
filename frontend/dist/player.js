@@ -4,14 +4,14 @@ export class HostPlayer {
     constructor(options = {}) {
         this.pingInterval = 1000;
         this.pingTimeout = this.pingInterval * 3;
-        this.x = 0;
-        this.y = 0;
+        this.x = Math.floor(options.worldSize / 2) || 0;
+        this.y = Math.floor(options.worldSize / 2) || 0;
         this.name = options.name;
         this.connection = options.connection;
         this.ctx = options.canvasContext;
         this.worldSize = options.worldSize;
         this.tail = [];
-        this.facing = "down";
+        this.facing = options.facing || "down";
         this.score = 0;
         this.colour = options.colour || "#000000";
         this.connection.send({

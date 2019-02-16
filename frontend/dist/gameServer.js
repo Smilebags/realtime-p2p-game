@@ -96,13 +96,28 @@ export class GameServer {
         });
     }
     addPlayer(name, connection) {
+        let rand = Math.random();
+        let facing = "down";
+        if (rand <= 0.25) {
+            facing = "up";
+        }
+        else if (rand <= 0.5) {
+            facing = "left";
+        }
+        else if (rand <= 0.75) {
+            facing = "down";
+        }
+        else {
+            facing = "right";
+        }
         let newPlayer = new HostPlayer({
             name,
             location: "host",
             canvasContext: this.context,
             worldSize: this.worldSize,
             colour: makePlayerColour(name),
-            connection
+            connection,
+            facing
         });
         newPlayer.on("disconnect", () => {
             this.removePlayer(newPlayer);
